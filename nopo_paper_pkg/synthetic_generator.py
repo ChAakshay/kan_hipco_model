@@ -251,6 +251,11 @@ def generate_quality_targets_and_noise(df_process, df_sec, seed=42):
     df_process_noisy['P_CO_atm'] += np.random.normal(0, 0.05, N)
     df_process_noisy['Flow_CO_SLPM'] *= np.random.normal(1.0, 0.005, N)
     
+    # Strictly enforce literature/process limits after noise addition
+    for k, (b_min, b_max, _, _) in PROCESS_BOUNDS.items():
+        if k in df_process_noisy.columns:
+            df_process_noisy[k] = np.clip(df_process_noisy[k], b_min, b_max)
+    
     # --- Missing-Data Pattern Injection ---
     df_targets_missing = df_targets.copy()
     mask_metals = np.random.rand(N) < 0.15
@@ -263,7 +268,7 @@ def generate_quality_targets_and_noise(df_process, df_sec, seed=42):
     df_targets_missing.loc[mask_uv, 'DWM_Purity_UV'] = np.nan
     df_targets_missing.loc[mask_gd, 'DWM_G/D'] = np.nan
     
-    return df_process_noisy, df_targets_missing
+    return df_process_noisy, df_targets_missing, df_targets
 
 # ------------------------------------------------------------------------------
 # STEP 18: Physical Sanity Checks
@@ -350,21 +355,24 @@ def generate_all_datasets(real_data_path="c:/Users/aaksh/Downloads/RX_ML_trainin
     df_sec_50 = calculate_secondary_parameters(df_proc_50)
     print("[OK] Computed 11 Derived Secondary Physics Parameters via 167-Formula Engine")
     
-    df_proc_5000_n, df_tar_5000 = generate_quality_targets_and_noise(df_proc_5000, df_sec_5000, seed=42)
-    df_proc_50_n, df_tar_50 = generate_quality_targets_and_noise(df_proc_50, df_sec_50, seed=101)
+    df_proc_5000_n, df_tar_5000_missing, df_tar_5000_complete = generate_quality_targets_and_noise(df_proc_5000, df_sec_5000, seed=42)
+    df_proc_50_n, df_tar_50_missing, df_tar_50_complete = generate_quality_targets_and_noise(df_proc_50, df_sec_50, seed=101)
     
-    df_large = pd.concat([df_proc_5000_n, df_sec_5000, df_tar_5000], axis=1)
-    df_small = pd.concat([df_proc_50_n, df_sec_50, df_tar_50], axis=1)
+    df_large = pd.concat([df_proc_5000_n, df_sec_5000, df_tar_5000_missing], axis=1)
+    df_large_complete = pd.concat([df_proc_5000_n, df_sec_5000, df_tar_5000_complete], axis=1)
+    df_small = pd.concat([df_proc_50_n, df_sec_50, df_tar_50_complete], axis=1)
     
     run_physical_sanity_checks(df_large)
     run_physical_sanity_checks(df_small)
     
     df_large.to_csv(LARGE_CSV, index=False)
     df_large.to_excel(LARGE_XLSX, index=False)
+    df_large_complete.to_csv(os.path.join(OUTPUT_DIR, "SWCNT_synthetic_5000_complete.csv"), index=False)
     df_small.to_csv(SMALL_CSV, index=False)
     df_small.to_excel(SMALL_XLSX, index=False)
     
     print(f"[OK] Saved Large Synthetic Dataset (N=5000): {LARGE_XLSX}")
+    print(f"[OK] Saved Complete Ground-Truth Dataset (N=5000): SWCNT_synthetic_5000_complete.csv")
     print(f"[OK] Saved Small Matched Synthetic Dataset (N=50): {SMALL_XLSX}")
     
     compile_data_card(df_large, df_small)

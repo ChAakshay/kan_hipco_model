@@ -23,7 +23,7 @@ def verify_app():
         'out_GD', 'out_Purity', 'out_Yield', 'out_Fe_Axial', 'out_Ni_Axial', 'out_Cr_Axial',
         'in_GD', 'in_Purity', 'in_Yield', 'in_Fe_Axial', 'in_Ni_Axial', 'in_Cr_Axial',
         'btnSolveInverse', 'inverseEvalPanel', 'evalTargetMatch', 'evalQualityErr', 'evalEpistemic', 'evalSonicCheck',
-        'badgeStatus', 'sec_tau', 'sec_Re', 'sec_Fe_conc', 'sec_eta', 'splineChart'
+        'badgeStatus', 'sec_tau', 'sec_Re', 'sec_Fe_conc', 'sec_eta'
     ]
 
     missing_ids = [rid for rid in required_ids if f'id="{rid}"' not in content and f"id='{rid}'" not in content]

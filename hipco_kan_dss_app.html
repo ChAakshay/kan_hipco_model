@@ -392,7 +392,7 @@
             gap: 6px;
             font-size: 10px;
             color: var(--text-secondary);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .target-input-field {
@@ -407,8 +407,18 @@
             font-weight: 700;
             text-align: center;
             outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         .target-input-field:focus { border-color: var(--accent-cyan); }
+        .target-input-field.input-clamped { border-color: var(--accent-amber); box-shadow: 0 0 6px rgba(245, 158, 11, 0.4); }
+
+        .bound-warning {
+            font-size: 8px;
+            color: var(--accent-amber);
+            font-weight: 600;
+            min-height: 12px;
+            margin-bottom: 4px;
+        }
 
         .match-bar-track {
             width: 100%;
@@ -811,8 +821,9 @@
                             <div id="out_GD" class="hero-qcard-val" style="color:var(--accent-cyan);">16.75</div>
                             <div class="hero-qcard-target">
                                 <span>Target:</span>
-                                <input type="number" id="in_GD" class="target-input-field" value="18.0" step="0.5" oninput="updateSimulation()">
+                                <input type="number" id="in_GD" class="target-input-field" value="18.0" min="8.0" max="24.0" step="0.5" oninput="onTargetInputChange('in_GD', 8.0, 24.0, 'warn_GD')">
                             </div>
+                            <div id="warn_GD" class="bound-warning"></div>
                             <div class="match-bar-track"><div id="bar_GD" class="match-bar-fill" style="width:93%;"></div></div>
                             <div id="match_GD" class="match-label">93.1% Match</div>
                         </div>
@@ -821,8 +832,9 @@
                             <div id="out_Yield" class="hero-qcard-val" style="color:var(--accent-green);">1.85 g</div>
                             <div class="hero-qcard-target">
                                 <span>Target:</span>
-                                <input type="number" id="in_Yield" class="target-input-field" value="2.0" step="0.1" oninput="updateSimulation()">
+                                <input type="number" id="in_Yield" class="target-input-field" value="2.0" min="0.5" max="3.6" step="0.1" oninput="onTargetInputChange('in_Yield', 0.5, 3.6, 'warn_Yield')">
                             </div>
+                            <div id="warn_Yield" class="bound-warning"></div>
                             <div class="match-bar-track"><div id="bar_Yield" class="match-bar-fill" style="width:92%;"></div></div>
                             <div id="match_Yield" class="match-label">92.5% Match</div>
                         </div>
@@ -831,8 +843,9 @@
                             <div id="out_Purity" class="hero-qcard-val" style="color:var(--accent-purple);">42.8%</div>
                             <div class="hero-qcard-target">
                                 <span>Target:</span>
-                                <input type="number" id="in_Purity" class="target-input-field" value="50.0" step="1.0" oninput="updateSimulation()">
+                                <input type="number" id="in_Purity" class="target-input-field" value="50.0" min="25.0" max="78.0" step="1.0" oninput="onTargetInputChange('in_Purity', 25.0, 78.0, 'warn_Purity')">
                             </div>
+                            <div id="warn_Purity" class="bound-warning"></div>
                             <div class="match-bar-track"><div id="bar_Purity" class="match-bar-fill" style="width:86%;"></div></div>
                             <div id="match_Purity" class="match-label">85.6% Match</div>
                         </div>
@@ -1298,6 +1311,32 @@
             updateSimulation();
         }
 
+        function onTargetInputChange(inputId, minVal, maxVal, warnId) {
+            const el = document.getElementById(inputId);
+            const warnEl = document.getElementById(warnId);
+            if (!el) return;
+
+            let val = parseFloat(el.value);
+            if (isNaN(val)) return;
+
+            if (val > maxVal) {
+                el.classList.add('input-clamped');
+                if (warnEl) warnEl.innerText = `⚠️ Clamped to Max (${maxVal})`;
+            } else if (val < minVal) {
+                el.classList.add('input-clamped');
+                if (warnEl) warnEl.innerText = `⚠️ Clamped to Min (${minVal})`;
+            } else {
+                el.classList.remove('input-clamped');
+                if (warnEl) warnEl.innerText = '';
+            }
+
+            updateSimulation();
+        }
+
+        function clamp(val, minVal, maxVal) {
+            return Math.min(maxVal, Math.max(minVal, val));
+        }
+
         function updateSimulation() {
             const P_CO = parseFloat(document.getElementById('sp_P_CO').value);
             const T_rxn = parseFloat(document.getElementById('sp_T_rxn').value);
@@ -1380,10 +1419,14 @@
             document.getElementById('out_Cr_Axial').innerText = Math.round(cr_axial).toLocaleString();
             document.getElementById('out_Cr_Radial').innerText = Math.round(cr_radial).toLocaleString();
 
-            // Forward Target Matching Progress Bars
-            const tgt_gd = parseFloat(document.getElementById('in_GD')?.value) || 18.0;
-            const tgt_yield = parseFloat(document.getElementById('in_Yield')?.value) || 2.0;
-            const tgt_purity = parseFloat(document.getElementById('in_Purity')?.value) || 50.0;
+            // Forward Target Matching Progress Bars (Clamped within feasible limits)
+            const raw_tgt_gd = parseFloat(document.getElementById('in_GD')?.value) || 18.0;
+            const raw_tgt_yield = parseFloat(document.getElementById('in_Yield')?.value) || 2.0;
+            const raw_tgt_purity = parseFloat(document.getElementById('in_Purity')?.value) || 50.0;
+
+            const tgt_gd = clamp(raw_tgt_gd, 8.0, 24.0);
+            const tgt_yield = clamp(raw_tgt_yield, 0.5, 3.6);
+            const tgt_purity = clamp(raw_tgt_purity, 25.0, 78.0);
 
             const m_gd = Math.min(100, Math.max(10, 100 - Math.abs(gd - tgt_gd) / tgt_gd * 100));
             const m_yield = Math.min(100, Math.max(10, 100 - Math.abs(yield_g - tgt_yield) / tgt_yield * 100));
@@ -1447,21 +1490,50 @@
                 modeEl.style.color = "var(--accent-green)";
             }
 
-            const targetGD = parseFloat(document.getElementById('in_GD')?.value) || 18.0;
-            const targetYield = parseFloat(document.getElementById('in_Yield')?.value) || 2.0;
+            // 1. Extract and Clamp Backtracking Input Targets within Strict Physical Envelope
+            const raw_tgt_gd = parseFloat(document.getElementById('in_GD')?.value) || 18.0;
+            const raw_tgt_yield = parseFloat(document.getElementById('in_Yield')?.value) || 2.0;
+            const raw_tgt_purity = parseFloat(document.getElementById('in_Purity')?.value) || 50.0;
 
-            let opt_T = 950 + (targetGD - 16.75) * 8.0;
-            let opt_P = 60 + (targetYield - 1.85) * 6.0;
-            let opt_Q_Fe = 190 + (targetYield - 1.85) * 15.0;
+            const targetGD = clamp(raw_tgt_gd, 8.0, 24.0);
+            const targetYield = clamp(raw_tgt_yield, 0.5, 3.6);
+            const targetPurity = clamp(raw_tgt_purity, 25.0, 78.0);
 
-            opt_T = Math.min(1080, Math.max(850, opt_T));
-            opt_P = Math.min(85, Math.max(30, opt_P));
-            opt_Q_Fe = Math.min(300, Math.max(80, opt_Q_Fe));
+            // Update UI input fields if clamped
+            if (document.getElementById('in_GD')) document.getElementById('in_GD').value = targetGD.toFixed(1);
+            if (document.getElementById('in_Yield')) document.getElementById('in_Yield').value = targetYield.toFixed(1);
+            if (document.getElementById('in_Purity')) document.getElementById('in_Purity').value = targetPurity.toFixed(1);
 
-            // Smooth Interpolation to Optimal Recipe (300ms transition)
+            // 2. Multi-Actuator Co-Optimization (Full 5-Actuator Backtracking)
+            const delta_yield = targetYield - 1.85;
+            const delta_gd = targetGD - 16.75;
+            const delta_purity = targetPurity - 42.83;
+
+            // Compute coordinated setpoint shifts
+            let opt_P = 60.0 + delta_yield * 13.0 + delta_gd * 0.5;
+            let opt_Q_CO = 600.0 + delta_yield * 210.0;
+            let opt_Q_Fe = 190.0 + delta_yield * 55.0;
+            let opt_T = 950.0 + delta_gd * 8.0 + delta_yield * 15.0;
+            let opt_T_spread = Math.max(5.0, 25.0 - delta_gd * 1.5);
+            let opt_Q_H2O = Math.min(48.0, Math.max(5.0, 30.0 + delta_gd * 1.2));
+            let opt_Zone_Dev = -5.0;
+
+            // Enforce Actuator Physical Bounds
+            opt_P = clamp(opt_P, 10.0, 90.0);
+            opt_Q_CO = clamp(opt_Q_CO, 100.0, 1000.0);
+            opt_Q_Fe = clamp(opt_Q_Fe, 10.0, 350.0);
+            opt_T = clamp(opt_T, 800.0, 1150.0);
+            opt_T_spread = clamp(opt_T_spread, 0.0, 80.0);
+            opt_Q_H2O = clamp(opt_Q_H2O, 1.0, 50.0);
+
+            // 3. Smooth Interpolation to Optimal Recipe (300ms transition)
             const start_T = parseFloat(document.getElementById('sp_T_rxn').value);
             const start_P = parseFloat(document.getElementById('sp_P_CO').value);
-            const start_Fe = parseFloat(document.getElementById('sp_Q_Fe').value);
+            const start_Q_CO = parseFloat(document.getElementById('sp_Q_CO').value);
+            const start_Q_Fe = parseFloat(document.getElementById('sp_Q_Fe').value);
+            const start_T_spread = parseFloat(document.getElementById('sp_T_spread').value);
+            const start_Q_H2O = parseFloat(document.getElementById('sp_Q_H2O').value);
+
             const frames = 12;
             let frame = 0;
 
@@ -1470,7 +1542,11 @@
                 const progress = frame / frames;
                 document.getElementById('sp_T_rxn').value = Math.round(start_T + progress * (opt_T - start_T));
                 document.getElementById('sp_P_CO').value = (start_P + progress * (opt_P - start_P)).toFixed(1);
-                document.getElementById('sp_Q_Fe').value = Math.round(start_Fe + progress * (opt_Q_Fe - start_Fe));
+                document.getElementById('sp_Q_CO').value = Math.round(start_Q_CO + progress * (opt_Q_CO - start_Q_CO));
+                document.getElementById('sp_Q_Fe').value = Math.round(start_Q_Fe + progress * (opt_Q_Fe - start_Q_Fe));
+                document.getElementById('sp_T_spread').value = (start_T_spread + progress * (opt_T_spread - start_T_spread)).toFixed(1);
+                document.getElementById('sp_Q_H2O').value = (start_Q_H2O + progress * (opt_Q_H2O - start_Q_H2O)).toFixed(1);
+                
                 updateSimulation();
 
                 if (frame >= frames) {
@@ -1491,16 +1567,16 @@
         function loadPreset(mode) {
             if (mode === 'yield') {
                 document.getElementById('in_Yield').value = 3.5;
-                document.getElementById('in_GD').value = 15.0;
-                document.getElementById('in_Purity').value = 55.0;
+                document.getElementById('in_GD').value = 16.5;
+                document.getElementById('in_Purity').value = 48.0;
             } else if (mode === 'purity') {
                 document.getElementById('in_Yield').value = 1.8;
                 document.getElementById('in_GD').value = 22.5;
                 document.getElementById('in_Purity').value = 75.0;
             } else if (mode === 'balanced') {
-                document.getElementById('in_Yield').value = 2.0;
-                document.getElementById('in_GD').value = 18.0;
-                document.getElementById('in_Purity').value = 50.0;
+                document.getElementById('in_Yield').value = 2.2;
+                document.getElementById('in_GD').value = 18.5;
+                document.getElementById('in_Purity').value = 55.0;
             } else if (mode === 'reset') {
                 document.getElementById('sp_P_CO').value = 60.0;
                 document.getElementById('sp_T_rxn').value = 950;
@@ -1509,6 +1585,9 @@
                 document.getElementById('sp_Q_Fe').value = 190;
                 document.getElementById('sp_Q_H2O').value = 30.0;
                 document.getElementById('sp_Zone_Dev').value = -5.0;
+                document.getElementById('in_GD').value = 18.0;
+                document.getElementById('in_Yield').value = 2.0;
+                document.getElementById('in_Purity').value = 50.0;
                 onUserSetpointChange();
                 return;
             }

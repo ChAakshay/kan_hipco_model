@@ -22,7 +22,7 @@ def verify_app():
         'delta_P_CO', 'delta_T_rxn', 'delta_Q_CO', 'delta_Q_Fe',
         'out_GD', 'out_Purity', 'out_Yield', 'out_Fe_Axial', 'out_Ni_Axial', 'out_Cr_Axial',
         'in_GD', 'in_Purity', 'in_Yield', 'in_Fe_Axial', 'in_Ni_Axial', 'in_Cr_Axial',
-        'btnSolveInverse', 'inverseEvalPanel', 'evalTargetMatch', 'evalQualityErr', 'evalEpistemic', 'evalSonicCheck',
+        'inverseEvalPanel', 'evalTargetMatch', 'evalQualityErr', 'evalEpistemic', 'evalSonicCheck',
         'badgeStatus', 'sec_tau', 'sec_Re', 'sec_Fe_conc', 'sec_eta'
     ]
 

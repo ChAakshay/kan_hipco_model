@@ -1,0 +1,74 @@
+{
+  "Target_Quality_Goal": {
+    "DWM_G/D": 18.0,
+    "DWM_Purity_UV": 50.0,
+    "DWM_Yield_g": 2.0
+  },
+  "PyKAN_Autograd_Inverse_Solution": {
+    "status": "success",
+    "optimal_recipe": {
+      "P_CO_atm": {
+        "recommended_setpoint": 90.0,
+        "uncertainty_std": 23.48,
+        "bounds": [
+          10.0,
+          90.0
+        ]
+      },
+      "T_rxn_mean_C": {
+        "recommended_setpoint": 835.1,
+        "uncertainty_std": 101.75,
+        "bounds": [
+          800.0,
+          1150.0
+        ]
+      },
+      "T_spread_C": {
+        "recommended_setpoint": 0.0,
+        "uncertainty_std": 20.03,
+        "bounds": [
+          0.0,
+          80.0
+        ]
+      },
+      "Flow_CO_SLPM": {
+        "recommended_setpoint": 800.2,
+        "uncertainty_std": 159.97,
+        "bounds": [
+          100.0,
+          1000.0
+        ]
+      },
+      "Flow_Fe_Precursor_SLPM": {
+        "recommended_setpoint": 350.0,
+        "uncertainty_std": 107.89,
+        "bounds": [
+          10.0,
+          350.0
+        ]
+      },
+      "H2O_Flow_ppmv": {
+        "recommended_setpoint": 47.97,
+        "uncertainty_std": 15.45,
+        "bounds": [
+          1.0,
+          50.0
+        ]
+      },
+      "Zone_SP_Dev_C": {
+        "recommended_setpoint": 15.0,
+        "uncertainty_std": 22.14,
+        "bounds": [
+          -35.0,
+          15.0
+        ]
+      }
+    },
+    "convergence_loss": 3.4658,
+    "n_seeds_evaluated": 20
+  },
+  "Baseline_Comparisons": {
+    "KNN_Backtracker_Recipe_MAE": 0.0,
+    "PLS_Analytical_Inverse_Recipe_MAE": 42.0965
+  }
+}

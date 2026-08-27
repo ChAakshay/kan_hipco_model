@@ -11,6 +11,10 @@ ENV/
 # Jupyter
 .ipynb_checkpoints
 
+# Proprietary / Industrial Raw Logs
+R9_PLC_Final.xlsx
+*.xlsx
+
 # IDEs
 .vscode/
 .idea/

@@ -26,3 +26,6 @@ Thumbs.db
 .DS_Store
 *.zip
 Study_and_work_In_Denmark_big.png
+
+# Offline Archive (Preserved locally, excluded from GitHub)
+offline_archive/

@@ -27,11 +27,10 @@ from sklearn.metrics import mean_absolute_error
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from nopo_paper_pkg.kan_model import KAN
-from nopo_paper_pkg.synthetic_generator import calculate_secondary_parameters
-from nopo_paper_pkg.inverse_optimizer import PyKANInverseSolver, SETPOINT_BOUNDS
+from nopo_paper_pkg.inverse_optimizer import PlasmaInverseSolver
 
-HTML_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "hipco_kan_dss_app.html")
-PRETRAINED_CHECKPOINT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kan_pretrained.pt")
+HTML_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "plasma_kan_dss_app.html")
+PRETRAINED_CHECKPOINT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "kan_plasma_pretrained.pt")
 PORT = 8050
 
 INPUT_FEATURES = [
@@ -58,7 +57,7 @@ QUALITY_TARGETS = [
 
 class DSSRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/' or self.path == '/hipco_kan_dss_app.html':
+        if self.path in ['/', '/hipco_kan_dss_app.html', '/plasma_kan_dss_app.html']:
             self.send_response(200)
             self.send_header('Content-type', 'text/html; charset=utf-8')
             self.end_headers()
@@ -74,28 +73,11 @@ class DSSRequestHandler(http.server.SimpleHTTPRequestHandler):
         if self.path == '/api/solve_inverse':
             try:
                 data_json = json.loads(post_data.decode('utf-8'))
-                target_gd = float(data_json.get('target_gd', 18.0))
-                target_purity = float(data_json.get('target_purity', 50.0))
-                target_yield = float(data_json.get('target_yield', 2.0))
+                target_conv = float(data_json.get('target_conv', 50.0))
+                target_eff = float(data_json.get('target_eff', 40.0))
 
-                # Load pretrained KAN & scalers
-                if os.path.exists(PRETRAINED_CHECKPOINT):
-                    chk = torch.load(PRETRAINED_CHECKPOINT, weights_only=False)
-                    model = KAN(layers_hidden=[len(INPUT_FEATURES), 16, len(QUALITY_TARGETS)], grid_size=3)
-                    model.load_state_dict(chk['model_state'])
-                    scaler_X, scaler_Y = chk['scaler_X'], chk['scaler_Y']
-                else:
-                    scaler_X, scaler_Y = StandardScaler(), StandardScaler()
-                    model = KAN(layers_hidden=[len(INPUT_FEATURES), 16, len(QUALITY_TARGETS)], grid_size=3)
-
-                solver = PyKANInverseSolver(model, scaler_X, scaler_Y)
-                target_dict = {
-                    'DWM_G/D': target_gd,
-                    'DWM_Purity_UV': target_purity,
-                    'DWM_Yield_g': target_yield
-                }
-
-                solution = solver.solve_recipe(target_dict, n_seeds=20)
+                solver = PlasmaInverseSolver()
+                solution = solver.solve_recipe(target_conversion=target_conv, target_efficiency=target_eff)
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
@@ -197,6 +179,7 @@ class DSSRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 def run_server():
     os.chdir(os.path.dirname(HTML_PATH))
+    socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), DSSRequestHandler) as httpd:
         print(f"[OK] HiPCO KAN DSS Web Application running at http://localhost:{PORT}/")
         print("  - POST /api/upload_and_train (Custom CSV Training)")

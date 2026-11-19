@@ -289,36 +289,62 @@ class BayesianKAN(nn.Module):
         return mean_pred, std_pred, mean_pred - 1.96 * std_pred, mean_pred + 1.96 * std_pred
 
 # ==============================================================================
-# 5. Second-Order PINN Differential Loss Engine (Customization 2)
+# 5. Plasma First-Principles PINN Differential Loss Engine (Customization 2)
 # ==============================================================================
 
-def compute_pinn_differential_loss(model, x_tensor, T_rxn_idx=1, P_CO_idx=0, Yield_idx=0, lambda_arr=0.1, lambda_mono=0.1):
+def compute_plasma_pinn_loss(model, x_tensor, sei_idx=6, conv_idx=0, eff_idx=1, sec_idx=2, 
+                            lambda_mono=15.0, lambda_eff=5.0, lambda_bound=0.005):
     """
-    Computes exact second-order autograd physics differential losses:
-    1. Arrhenius Activation Barrier: d(Yield)/d(T_rxn) >= 0 in catalytic activation window.
-    2. Thermodynamic Monotonicity Barrier: d(Yield)/d(P_CO) >= 0 (positive driving force).
+    Computes exact autograd physics differential losses for Plasma CO2 conversion:
+    1. Energy Conservation & Monotonic Dissociation: d(Conversion)/d(SEI) >= 0.
+       (Increasing power input cannot decrease the steady-state CO2 dissociation fraction).
+    2. Non-Equilibrium Thermal Roll-Off: d(Efficiency)/d(SEI) <= 0 at elevated SEI.
+       (At high SEI, vibrational non-equilibrium over-relaxes into gas heating, inducing recombination).
+    3. Thermodynamic Bounds in physical space:
+       - Conversion chi in [0, 100]%
+       - Energy Efficiency eta in [0, 100]%
     """
     x_req = x_tensor.clone().detach().requires_grad_(True)
     y_pred = model(x_req)
     
-    yield_pred = y_pred[:, Yield_idx]
+    conv = y_pred[:, conv_idx]
+    eff = y_pred[:, eff_idx]
     
-    grads = torch.autograd.grad(
-        outputs=yield_pred,
+    # 1. Monotonicity: dConv / dSEI >= 0 with a positive barrier margin (0.02)
+    grads_conv = torch.autograd.grad(
+        outputs=conv,
         inputs=x_req,
-        grad_outputs=torch.ones_like(yield_pred),
+        grad_outputs=torch.ones_like(conv),
         create_graph=True,
         retain_graph=True
     )[0]
+    dConv_dSEI = grads_conv[:, sei_idx]
+    loss_mono = torch.mean(F.relu(0.01 - dConv_dSEI) ** 2)
     
-    dYield_dP = grads[:, P_CO_idx]
-    loss_monotonicity = torch.mean(F.relu(-dYield_dP) ** 2)
+    # 2. Efficiency Roll-Off at high SEI (normalized SEI > 0.5)
+    grads_eff = torch.autograd.grad(
+        outputs=eff,
+        inputs=x_req,
+        grad_outputs=torch.ones_like(eff),
+        create_graph=True,
+        retain_graph=True
+    )[0]
+    dEff_dSEI = grads_eff[:, sei_idx]
+    high_sei_mask = (x_req[:, sei_idx] > 0.5)
+    loss_eff_rolloff = torch.mean(F.relu(dEff_dSEI[high_sei_mask]) ** 2) if high_sei_mask.any() else torch.tensor(0.0, device=x_tensor.device)
     
-    dYield_dT = grads[:, T_rxn_idx]
-    loss_arrhenius = torch.mean(F.relu(-dYield_dT) ** 2)
+    # 3. Thermodynamic bounds in approximate physical space (mu_c=38.8, s_c=20.5; mu_e=45.2, s_e=12.9)
+    conv_phys = conv * 20.56 + 38.80
+    eff_phys = eff * 12.94 + 45.27
+    loss_bound_conv = torch.mean(F.relu(-conv_phys) ** 2) + torch.mean(F.relu(conv_phys - 100.0) ** 2)
+    loss_bound_eff = torch.mean(F.relu(-eff_phys) ** 2) + torch.mean(F.relu(eff_phys - 100.0) ** 2)
+    loss_bounds = loss_bound_conv + loss_bound_eff
     
-    total_pinn_loss = lambda_mono * loss_monotonicity + lambda_arr * loss_arrhenius
-    return total_pinn_loss, loss_monotonicity.item(), loss_arrhenius.item()
+    total_loss = lambda_mono * loss_mono + lambda_eff * loss_eff_rolloff + lambda_bound * loss_bounds
+    return total_loss, loss_mono.item(), loss_eff_rolloff.item() if isinstance(loss_eff_rolloff, torch.Tensor) else 0.0
+
+# Legacy compatibility alias
+compute_pinn_differential_loss = compute_plasma_pinn_loss
 
 # ==============================================================================
 # 6. Multi-Fidelity Discrepancy Decomposition KAN (Customization 4)
@@ -350,7 +376,7 @@ class KANEnsemble(nn.Module):
     to quantify epistemic model uncertainty and compute 95% credible intervals:
         y_{95%} = mean(y) +/- 1.96 * sigma_ensemble / sqrt(M)
     """
-    def __init__(self, layers_hidden=[18, 16, 9], grid_sizes=[3, 4, 5, 6, 7], use_attention=True):
+    def __init__(self, layers_hidden=[8, 12, 3], grid_sizes=[3, 4, 5, 6, 7], use_attention=True):
         super(KANEnsemble, self).__init__()
         self.models = nn.ModuleList([
             KAN(layers_hidden, grid_size=gs, use_attention=use_attention)
@@ -389,4 +415,183 @@ def compute_mahalanobis_ood(x_tensor, mean_train, cov_inv_train, threshold=35.0)
     dist = torch.sqrt(torch.sum((diff @ cov_inv_train) * diff, dim=-1))
     is_ood = dist > threshold
     return dist.squeeze().item() if dist.numel() == 1 else dist, is_ood.squeeze().item() if is_ood.numel() == 1 else is_ood
+
+# ==============================================================================
+# 8. Production Training & Serialization Routine for Plasma CO2 Benchmark
+# ==============================================================================
+
+PLASMA_FEATURE_COLS = [
+    "Discharge_Power_W",
+    "Gas_Flow_Rate_LPM",
+    "Operating_Pressure_bar",
+    "Discharge_Gap_mm",
+    "Discharge_Length_mm",
+    "AC_Frequency_kHz",
+    "Specific_Energy_Input_kJ_L",
+    "Residence_Time_s"
+]
+
+PLASMA_TARGET_COLS = [
+    "CO2_Conversion_pct",
+    "Energy_Efficiency_pct",
+    "Specific_Energy_Consumption_kJ_mol"
+]
+
+def train_plasma_kan_model(epochs=180, lr=0.005, seed=42, save_path=None):
+    """
+    Trains production Physics-Informed Variational RBF-KAN on authentic 358-run database.
+    Evaluates on test split and computes R2, RMSE, and physical monotonicity metrics.
+    """
+    import os
+    import pandas as pd
+    import numpy as np
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+    
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_dir = os.path.join(base_dir, "data")
+    models_dir = os.path.join(base_dir, "models")
+    os.makedirs(models_dir, exist_ok=True)
+    
+    if save_path is None:
+        save_path = os.path.join(models_dir, "kan_plasma_pretrained.pt")
+        
+    train_path = os.path.join(data_dir, "plasma_co2_train.csv")
+    val_path = os.path.join(data_dir, "plasma_co2_val.csv")
+    test_path = os.path.join(data_dir, "plasma_co2_test.csv")
+    
+    df_train = pd.read_csv(train_path)
+    df_val = pd.read_csv(val_path)
+    df_test = pd.read_csv(test_path)
+    
+    X_tr = df_train[PLASMA_FEATURE_COLS].values
+    y_tr = df_train[PLASMA_TARGET_COLS].values
+    
+    X_val = df_val[PLASMA_FEATURE_COLS].values
+    y_val = df_val[PLASMA_TARGET_COLS].values
+    
+    X_te = df_test[PLASMA_FEATURE_COLS].values
+    y_te = df_test[PLASMA_TARGET_COLS].values
+    
+    # Target values: predict log(SEC) to stabilize regression across 3 orders of magnitude
+    y_tr_processed = y_tr.copy()
+    y_tr_processed[:, 2] = np.log(np.maximum(y_tr[:, 2], 100.0))
+    
+    y_val_processed = y_val.copy()
+    y_val_processed[:, 2] = np.log(np.maximum(y_val[:, 2], 100.0))
+    
+    y_te_processed = y_te.copy()
+    y_te_processed[:, 2] = np.log(np.maximum(y_te[:, 2], 100.0))
+    
+    scaler_x = StandardScaler()
+    scaler_y = StandardScaler()
+    
+    X_tr_s = scaler_x.fit_transform(X_tr)
+    y_tr_s = scaler_y.fit_transform(y_tr_processed)
+    
+    X_val_s = scaler_x.transform(X_val)
+    y_val_s = scaler_y.transform(y_val_processed)
+    
+    X_te_s = scaler_x.transform(X_te)
+    y_te_s = scaler_y.transform(y_te_processed)
+    
+    t_X_tr = torch.tensor(X_tr_s, dtype=torch.float32)
+    t_y_tr = torch.tensor(y_tr_s, dtype=torch.float32)
+    t_X_val = torch.tensor(X_val_s, dtype=torch.float32)
+    t_y_val = torch.tensor(y_val_s, dtype=torch.float32)
+    t_X_te = torch.tensor(X_te_s, dtype=torch.float32)
+    
+    model = KAN(layers_hidden=[8, 12, 3], grid_size=5, use_attention=True)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-4)
+    
+    best_val_r2 = -1e9
+    best_state = None
+    
+    for epoch in range(1, epochs + 1):
+        model.train()
+        optimizer.zero_grad()
+        
+        y_pred = model(t_X_tr)
+        mse_loss = F.mse_loss(y_pred, t_y_tr)
+        
+        # Physics PINN loss evaluated on training batch + collocation domain probes
+        colloc_points = torch.randn(256, 8) * 1.2
+        combined_physics_points = torch.cat([t_X_tr, colloc_points], dim=0)
+        
+        pinn_loss, mono_loss, eff_loss = compute_plasma_pinn_loss(
+            model, combined_physics_points, sei_idx=6, conv_idx=0, eff_idx=1, sec_idx=2,
+            lambda_mono=25.0, lambda_eff=10.0, lambda_bound=0.01
+        )
+        l1_reg = 1e-4 * model.l1_regularization()
+        
+        loss = mse_loss + pinn_loss + l1_reg
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+        optimizer.step()
+        scheduler.step()
+        
+        if epoch % 20 == 0 or epoch == epochs:
+            model.eval()
+            with torch.no_grad():
+                val_pred = model(t_X_val).numpy()
+                val_pred_orig = scaler_y.inverse_transform(val_pred)
+                r2_conv = r2_score(y_val[:, 0], val_pred_orig[:, 0])
+                r2_eff = r2_score(y_val[:, 1], val_pred_orig[:, 1])
+                mean_r2 = (r2_conv + r2_eff) / 2.0
+                
+                if mean_r2 > best_val_r2:
+                    best_val_r2 = mean_r2
+                    best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
+                    
+    # Load best state
+    if best_state is not None:
+        model.load_state_dict(best_state)
+        
+    model.eval()
+    with torch.no_grad():
+        test_pred_s = model(t_X_te).numpy()
+        test_pred_orig = scaler_y.inverse_transform(test_pred_s)
+        test_pred = test_pred_orig.copy()
+        test_pred[:, 2] = np.exp(test_pred_orig[:, 2]) # invert log(SEC)
+        
+    r2_test_conv = r2_score(y_te[:, 0], test_pred[:, 0])
+    r2_test_eff = r2_score(y_te[:, 1], test_pred[:, 1])
+    r2_test_sec = r2_score(y_te[:, 2], test_pred[:, 2])
+    rmse_conv = np.sqrt(mean_squared_error(y_te[:, 0], test_pred[:, 0]))
+    mae_conv = mean_absolute_error(y_te[:, 0], test_pred[:, 0])
+    
+    print("=" * 60)
+    print("PLASMA KAN TRAINING EVALUATION (Test Split, N=35)")
+    print(f"CO2 Conversion R2:     {r2_test_conv:.4f} (RMSE: {rmse_conv:.2f}%, MAE: {mae_conv:.2f}%)")
+    print(f"Energy Efficiency R2:  {r2_test_eff:.4f}")
+    print(f"Specific Energy R2:    {r2_test_sec:.4f}")
+    print("=" * 60)
+    
+    # Save checkpoint with scaler metadata
+    checkpoint = {
+        "model_state_dict": model.state_dict(),
+        "layers_hidden": [8, 12, 3],
+        "grid_size": 5,
+        "use_attention": True,
+        "scaler_x_mean": scaler_x.mean_,
+        "scaler_x_scale": scaler_x.scale_,
+        "scaler_y_mean": scaler_y.mean_,
+        "scaler_y_scale": scaler_y.scale_,
+        "features": PLASMA_FEATURE_COLS,
+        "targets": PLASMA_TARGET_COLS,
+        "r2_test_conv": float(r2_test_conv),
+        "r2_test_eff": float(r2_test_eff),
+        "rmse_conv": float(rmse_conv),
+        "mae_conv": float(mae_conv)
+    }
+    torch.save(checkpoint, save_path)
+    print(f"[OK] Trained model checkpoint saved: {save_path}")
+    return model, checkpoint
+
+if __name__ == "__main__":
+    train_plasma_kan_model()
 

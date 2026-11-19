@@ -1,0 +1,48 @@
+================================================================================
+       HiPCO KAN Cyber-Physical Decision Support System — Quickstart Guide
+================================================================================
+
+Hi! You can run this application in 2 very simple ways:
+
+--------------------------------------------------------------------------------
+OPTION 1: THE FASTEST & EASIEST WAY (Zero installation, works on any computer)
+--------------------------------------------------------------------------------
+1. Simply double-click:
+   hipco_kan_dss_app.html
+
+2. It will open immediately in your web browser (Chrome, Edge, Safari, Firefox).
+3. That's it! No Python, no terminal, and no installation required.
+   You can adjust reactor sliders, test targets, view the 3D Pareto frontier,
+   and explore all 5 tabs right inside your browser.
+
+
+--------------------------------------------------------------------------------
+OPTION 2: THE FULL SCIENTIFIC AI APP (With live PyTorch inverse optimization)
+--------------------------------------------------------------------------------
+If you have Python installed and want to run the full PyTorch neural network
+backend with real-time autograd optimization:
+
+* On Windows:
+  Double-click: RUN_APP.bat
+
+* On Mac / Linux:
+  Double-click or run in Terminal: ./RUN_APP.sh
+
+* Or from any Command Prompt / Terminal:
+  python launcher.py
+
+This automatically checks dependencies, starts the local server at
+http://localhost:8050/, and opens your browser.
+
+
+--------------------------------------------------------------------------------
+DOCUMENTS INCLUDED IN THIS PACKAGE:
+--------------------------------------------------------------------------------
+- HiPCO_KAN_Research_Paper.pdf       : Full journal research paper (PDF)
+- HiPCO_KAN_Research_Paper.docx      : Full journal research paper (Word DOCX)
+- HiPCO_KAN_Comprehensive_Guide.pdf  : Technical & engineering compendium
+- HiPCO_KAN_Review_Panel_Presentation.pptx : 16:9 Slide deck presentation
+- review_panel_presentation.html     : Interactive browser presentation deck
+
+Enjoy exploring the HiPCO KAN Decision Support System!
+================================================================================

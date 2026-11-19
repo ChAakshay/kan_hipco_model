@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/api/solve_inverse", "destination": "/api/solve_inverse.js" },
+    { "source": "/plasma", "destination": "/plasma_kan_dss_app.html" },
+    { "source": "/hipco", "destination": "/hipco_kan_dss_app.html" }
+  ]
+}

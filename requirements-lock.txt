@@ -1,0 +1,9 @@
+numpy==1.26.4
+torch==2.8.0+cpu
+xgboost==3.2.0
+scikit-learn==1.6.1
+sympy==1.14.0
+pytest==8.3.5
+pandas==2.1.4
+scipy==1.11.4
+matplotlib==3.10.0

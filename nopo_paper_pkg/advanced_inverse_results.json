@@ -3,119 +3,119 @@
     "status": "success",
     "optimal_recipe": {
       "P_CO_atm": {
-        "recommended_setpoint": 72.17,
-        "uncertainty_std": 21.69,
+        "recommended_setpoint": 80.8,
+        "uncertainty_std": 22.04,
         "tolerance_interval_95": [
-          62.67,
-          81.68
+          71.14,
+          90.45
         ],
-        "tolerance_string": "72.2 \u00b1 9.5 atm",
+        "tolerance_string": "80.8 \u00b1 9.7 atm",
         "bounds": [
           10.0,
           90.0
         ]
       },
       "T_rxn_mean_C": {
-        "recommended_setpoint": 1020.02,
-        "uncertainty_std": 105.54,
+        "recommended_setpoint": 1029.63,
+        "uncertainty_std": 90.25,
         "tolerance_interval_95": [
-          973.76,
-          1066.27
+          990.07,
+          1069.18
         ],
-        "tolerance_string": "1020.0 \u00b1 46.3 \u00b0C",
+        "tolerance_string": "1029.6 \u00b1 39.6 \u00b0C",
         "bounds": [
           800.0,
           1150.0
         ]
       },
       "T_spread_C": {
-        "recommended_setpoint": 16.21,
-        "uncertainty_std": 18.8,
+        "recommended_setpoint": 59.9,
+        "uncertainty_std": 23.62,
         "tolerance_interval_95": [
-          7.98,
-          24.45
+          49.55,
+          70.25
         ],
-        "tolerance_string": "16.2 \u00b1 8.2 \u00b0C",
+        "tolerance_string": "59.9 \u00b1 10.4 \u00b0C",
         "bounds": [
           0.0,
           80.0
         ]
       },
       "Flow_CO_SLPM": {
-        "recommended_setpoint": 249.33,
-        "uncertainty_std": 238.79,
+        "recommended_setpoint": 295.73,
+        "uncertainty_std": 223.83,
         "tolerance_interval_95": [
-          144.68,
-          353.98
+          197.63,
+          393.83
         ],
-        "tolerance_string": "249.3 \u00b1 104.7 SLPM",
+        "tolerance_string": "295.7 \u00b1 98.1 SLPM",
         "bounds": [
           100.0,
           1000.0
         ]
       },
       "Flow_Fe_Precursor_SLPM": {
-        "recommended_setpoint": 241.56,
-        "uncertainty_std": 90.49,
+        "recommended_setpoint": 190.23,
+        "uncertainty_std": 105.97,
         "tolerance_interval_95": [
-          201.9,
-          281.22
+          143.78,
+          236.67
         ],
-        "tolerance_string": "241.6 \u00b1 39.7 SLPM",
+        "tolerance_string": "190.2 \u00b1 46.4 SLPM",
         "bounds": [
           10.0,
           350.0
         ]
       },
       "H2O_Flow_ppmv": {
-        "recommended_setpoint": 6.06,
-        "uncertainty_std": 11.75,
+        "recommended_setpoint": 48.87,
+        "uncertainty_std": 13.8,
         "tolerance_interval_95": [
-          0.91,
-          11.21
+          42.82,
+          54.92
         ],
-        "tolerance_string": "6.1 \u00b1 5.2 SLPM",
+        "tolerance_string": "48.9 \u00b1 6.0 SLPM",
         "bounds": [
           1.0,
           50.0
         ]
       },
       "Zone_SP_Dev_C": {
-        "recommended_setpoint": -18.48,
-        "uncertainty_std": 15.23,
+        "recommended_setpoint": 11.36,
+        "uncertainty_std": 14.19,
         "tolerance_interval_95": [
-          -25.16,
-          -11.81
+          5.14,
+          17.58
         ],
-        "tolerance_string": "-18.5 \u00b1 6.7 \u00b0C",
+        "tolerance_string": "11.4 \u00b1 6.2 \u00b0C",
         "bounds": [
           -35.0,
           15.0
         ]
       }
     },
-    "convergence_loss": 0.8123,
+    "convergence_loss": 0.6532,
     "n_seeds_evaluated": 20,
     "epistemic_uncertainty_norm": NaN,
-    "mahalanobis_ood_distance": 30.44,
+    "mahalanobis_ood_distance": 7.2,
     "is_within_safe_envelope": false
   },
   "Noise_Stress_Test_Results": {
     "Noise_1.0%": {
-      "mean_degradation_GD": 0.6272732615470886,
-      "mean_degradation_Yield": 0.06912969797849655
+      "mean_degradation_GD": 0.24795065820217133,
+      "mean_degradation_Yield": 0.0216988455504179
     },
     "Noise_2.0%": {
-      "mean_degradation_GD": 1.2070794105529785,
-      "mean_degradation_Yield": 0.12174805998802185
+      "mean_degradation_GD": 0.48254597187042236,
+      "mean_degradation_Yield": 0.0426611602306366
     },
     "Noise_5.0%": {
-      "mean_degradation_GD": 2.8620522022247314,
-      "mean_degradation_Yield": 0.261811763048172
+      "mean_degradation_GD": 1.1736503839492798,
+      "mean_degradation_Yield": 0.11094550788402557
     },
     "Noise_10.0%": {
-      "mean_degradation_GD": 4.65521240234375,
-      "mean_degradation_Yield": 0.46091321110725403
+      "mean_degradation_GD": 1.9866697788238525,
+      "mean_degradation_Yield": 0.19880372285842896
     }
   }
 }

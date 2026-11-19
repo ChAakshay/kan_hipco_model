@@ -1,0 +1,73 @@
+================================================================================
+      DEEP AUDIT: SWCNT_synthetic_5000.csv & PyKAN PRETRAINED MODEL
+================================================================================
+
+[1] DATASET INTEGRITY & TOPOLOGY:
+    - File Path: c:\Users\aaksh\Downloads\paper\nopo_paper_pkg\SWCNT_synthetic_5000.csv
+    - Dimensions: 5,000 Rows x 28 Columns
+    - Memory Footprint: 1093.9 KB
+    - Total Missing / NaN Values: 5179 ([WARNING])
+    - Actuator Columns (7/7): [ALL PRESENT OK]
+    - Derived Physics Columns (11/11): [ALL PRESENT OK]
+    - Quality Target Columns (9/9): [ALL PRESENT OK]
+
+[2] ACTUATOR INPUT STATISTICAL DISTRIBUTION & BOUND VALIDATION:
+    Feature Name                 |      Min |     Mean |      Max |      Std | Status      
+    ---------------------------------------------------------------------------
+    P_CO_atm                     |    10.00 |    59.82 |    90.00 |    13.59 | PASSED      
+    T_rxn_mean_C                 |   800.00 |   949.28 |  1150.00 |    58.17 | PASSED      
+    T_spread_C                   |     0.00 |    28.14 |    80.00 |    22.92 | PASSED      
+    Flow_CO_SLPM                 |   100.00 |   595.30 |  1000.00 |   232.24 | PASSED      
+    Flow_Fe_Precursor_SLPM       |    10.00 |   190.95 |   350.00 |    90.31 | PASSED      
+    H2O_Flow_ppmv                |    26.79 |    29.67 |    32.45 |     0.78 | PASSED      
+    Zone_SP_Dev_C                |   -35.00 |    -6.68 |    15.00 |    11.82 | PASSED      
+
+[3] 11-DIMENSIONAL DERIVED FIRST-PRINCIPLES PHYSICS DISTRIBUTIONS:
+    Physics Variable                     |       Min |      Mean |       Max | Status
+    ---------------------------------------------------------------------------
+    Residence_Time_s                     |     5.676 |    18.933 |   114.476 | PASSED
+    Reynolds_Number                      | 20578.673 | 147202.792 | 257942.782 | PASSED
+    Fe_Concentration_ppm                 |   320.533 |  2321.826 |  3915.314 | PASSED
+    CO_Disproportionation_DrivingForce   |     0.000 |     0.000 |     0.000 | PASSED
+    Thermal_Loss_kW                      |     0.620 |     2.146 |     4.820 | PASSED
+    P_CO2_Partial_bar                    |     0.080 |     0.672 |     1.350 | PASSED
+    Nucleation_Rate_Est                  | 341930485.693 | 33969570941.059 | 146385386739.734 | PASSED
+    Linear_Gas_Velocity_m_s              |    18.537 |   137.805 |   373.866 | PASSED
+    Catalyst_Growth_Time_Ratio           |     0.178 |     1.016 |    12.039 | PASSED
+    Thermal_Boundary_Thickness_mm        |     0.500 |     0.569 |     2.573 | PASSED
+    Water_CO_Ratio_ppm                   |    26.786 |    29.667 |    32.446 | PASSED
+
+[4] 9 QUALITY TARGET EMPIRICAL GROUND TRUTH DISTRIBUTIONS:
+    Target Output            |        Min |       Mean |        Max |        Std
+    ---------------------------------------------------------------------------
+    DWM_Yield_g              |       0.05 |       1.57 |       3.96 |       0.96
+    DWM_G/D                  |       7.29 |      15.31 |      24.64 |       2.39
+    DWM_Purity_UV            |      18.73 |      41.00 |      65.00 |       7.25
+    DWM_Ni_ppm_Axial         |     508.88 |    1256.45 |    2317.78 |     277.64
+    DWM_Ni_ppm_Radial        |     507.44 |    1256.44 |    2421.80 |     280.45
+    DWM_Fe_ppm_Axial         |   50000.00 |  303053.26 |  561886.65 |   57109.29
+    DWM_Fe_ppm_Radial        |   47590.44 |  303016.45 |  571397.15 |   57748.90
+    DWM_Cr_ppm_Axial         |     679.44 |    1332.39 |    2317.02 |     221.38
+    DWM_Cr_ppm_Radial        |     695.29 |    1332.64 |    2242.71 |     224.70
+
+[5] PRETRAINED PyKAN FORWARD EVALUATION ON N=5,000 SAMPLES:
+    Target Name            |  R^2 Score |        MAE |       RMSE |   MAPE (%) |  Max Error
+    -------------------------------------------------------------------------------------
+    DWM_Yield_g            |     0.9919 |      0.063 |      0.086 |     12.84% |       0.58 (N=5,000) [OK]
+    DWM_G/D                |     0.8826 |      0.647 |      0.819 |      4.33% |       3.33 (N=4,742) [OK]
+    DWM_Purity_UV          |     0.9307 |      1.499 |      1.909 |      3.80% |       7.85 (N=4,531) [OK]
+    DWM_Ni_ppm_Axial       |     0.8217 |     93.905 |    117.221 |      8.08% |     531.44 (N=4,258) [OK]
+    DWM_Ni_ppm_Radial      |     0.8024 |    100.423 |    124.652 |      8.62% |     594.88 (N=4,258) [OK]
+    DWM_Fe_ppm_Axial       |     0.7300 |  23135.543 |  29671.996 |     10.09% |  129715.61 (N=4,258) [OK]
+    DWM_Fe_ppm_Radial      |     0.7170 |  24085.881 |  30714.954 |     10.37% |  142300.87 (N=4,258) [OK]
+    DWM_Cr_ppm_Axial       |     0.7385 |     90.471 |    113.200 |      6.98% |     492.13 (N=4,258) [OK]
+    DWM_Cr_ppm_Radial      |     0.7152 |     96.022 |    119.896 |      7.41% |     473.67 (N=4,258) [OK]
+    -------------------------------------------------------------------------------------
+    MEAN (ALL 9 TARGETS)   |     0.8144 |   5289.384 |          - |      8.06% | -
+
+[6] NUMERICAL & PHYSICAL SANITY CHECKS:
+    - Negative Yield Predictions: 0 / 5,000 ([NONE OK])
+    - Negative G/D Ratio Predictions: 0 / 5,000 ([NONE OK])
+    - Negative Purity Predictions: 0 / 5,000 ([NONE OK])
+    - Model Inference Latency (Batch=5000): Evaluated in 42.1 ms (8.42 us / sample)
+================================================================================

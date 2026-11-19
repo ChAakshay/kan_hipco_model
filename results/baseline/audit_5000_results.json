@@ -1,0 +1,64 @@
+{
+  "evaluation_protocol": "Pre-trained KAN evaluation on full 5,000 synthetic training batches",
+  "checkpoint": "kan_pretrained.pt",
+  "dataset": "SWCNT_synthetic_5000.csv",
+  "sample_size": 5000,
+  "metrics": {
+    "DWM_Yield_g": {
+      "R2": 0.9919,
+      "MAE": 0.063,
+      "RMSE": 0.086,
+      "MAPE_%": 12.84
+    },
+    "DWM_G/D": {
+      "R2": 0.8826,
+      "MAE": 0.647,
+      "RMSE": 0.819,
+      "MAPE_%": 4.33
+    },
+    "DWM_Purity_UV": {
+      "R2": 0.9307,
+      "MAE": 1.499,
+      "RMSE": 1.909,
+      "MAPE_%": 3.8
+    },
+    "DWM_Ni_ppm_Axial": {
+      "R2": 0.8217,
+      "MAE": 93.905,
+      "RMSE": 117.221,
+      "MAPE_%": 8.08
+    },
+    "DWM_Ni_ppm_Radial": {
+      "R2": 0.8024,
+      "MAE": 100.423,
+      "RMSE": 124.652,
+      "MAPE_%": 8.62
+    },
+    "DWM_Fe_ppm_Axial": {
+      "R2": 0.73,
+      "MAE": 23135.543,
+      "RMSE": 29671.996,
+      "MAPE_%": 10.09
+    },
+    "DWM_Fe_ppm_Radial": {
+      "R2": 0.717,
+      "MAE": 24085.881,
+      "RMSE": 30714.954,
+      "MAPE_%": 10.37
+    },
+    "DWM_Cr_ppm_Axial": {
+      "R2": 0.7385,
+      "MAE": 90.471,
+      "RMSE": 113.2,
+      "MAPE_%": 6.98
+    },
+    "DWM_Cr_ppm_Radial": {
+      "R2": 0.7152,
+      "MAE": 96.022,
+      "RMSE": 119.896,
+      "MAPE_%": 7.41
+    }
+  },
+  "mean_r2_all_9": 0.8144,
+  "mean_mape_all_9": 8.06
+}

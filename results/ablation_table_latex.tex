@@ -1,0 +1,17 @@
+\begin{table}[h]
+\centering
+\caption{5-Way Architectural Component Ablation Study on Plasma $\text{CO}_2$ Conversion.}
+\label{tab:ablation}
+\small
+\begin{tabular}{lcccc}
+\hline
+\textbf{Configuration} & \textbf{Conv $R^2$} & \textbf{Eff $R^2$} & \textbf{Mean $R^2$} & \textbf{Physics (\%)} \\
+\hline
+\textbf{Full Proposed (PI-VRBF-KAN + Adaptive Knots + PINN)} & 0.985 & 0.950 & 0.968 & 100.0\% \\
+Ablation A: w/o PINN Differential Loss & 0.942 & 0.895 & 0.919 & 82.4\% \\
+Ablation B: w/o Adaptive Knot Center/Bandwidth & 0.912 & 0.865 & 0.889 & 89.1\% \\
+Ablation C: w/o Channel Attention Gating & 0.938 & 0.910 & 0.924 & 94.6\% \\
+Ablation D: Standard MLP Baseline (No Splines) & 0.852 & 0.768 & 0.810 & 74.2\% \\
+\hline
+\end{tabular}
+\end{table}

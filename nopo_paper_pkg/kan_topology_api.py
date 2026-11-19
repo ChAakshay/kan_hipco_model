@@ -187,18 +187,14 @@ class ActiveLearningRecommender:
                 cand[k] = np.random.uniform(low, high)
             candidates.append(cand)
             
-        # Add secondary parameters via mocked physical engine
-        X_cands = []
-        for cand in candidates:
-            row = []
-            for f in INPUT_FEATURES:
-                if f in cand:
-                    row.append(cand[f])
-                else:
-                    row.append(0.0) # mock secondary for now
-            X_cands.append(row)
-            
-        X_tensor = torch.tensor(scaler_X.transform(np.array(X_cands)), dtype=torch.float32)
+        # Compute authentic secondary transport parameters using 167-formula physics engine
+        import pandas as pd
+        from nopo_paper_pkg.synthetic_generator import calculate_secondary_parameters
+        df_cands = pd.DataFrame(candidates)
+        df_sec = calculate_secondary_parameters(df_cands)
+        df_full = pd.concat([df_cands, df_sec], axis=1)[INPUT_FEATURES]
+        X_cands = df_full.values
+        X_tensor = torch.tensor(scaler_X.transform(X_cands), dtype=torch.float32)
         
         # MC-dropout epistemic uncertainty (20 stochastic passes with Gaussian noise)
         preds = []
@@ -289,79 +285,166 @@ class ThermodynamicValidator:
             'compliance_checks': checks
         }
 
+# ------------------------------------------------------------------------------
+# 5. MODEL SERVICE SINGLETON
+# ------------------------------------------------------------------------------
+class ModelService:
+    _instance = None
+    
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+        
+    def __init__(self):
+        pkg_dir = os.path.dirname(os.path.abspath(__file__))
+        self.model_path = os.path.join(pkg_dir, 'kan_pretrained.pt')
+        self.model = KAN(layers_hidden=[len(INPUT_FEATURES), 16, len(QUALITY_TARGETS)], grid_size=3)
+        self.scaler_X = DummyScaler()
+        self.scaler_Y = DummyScaler()
+        
+        if os.path.exists(self.model_path):
+            ckpt = torch.load(self.model_path, weights_only=False)
+            self.model.load_state_dict(ckpt['model_state'] if 'model_state' in ckpt else ckpt)
+            if 'scaler_X' in ckpt:
+                self.scaler_X = ckpt['scaler_X']
+            if 'scaler_Y' in ckpt:
+                self.scaler_Y = ckpt['scaler_Y']
+            print(f"[ModelService] Loaded neural weights and scalers from {self.model_path}")
+        else:
+            print("[ModelService] Warning: kan_pretrained.pt not found, using initialized weights")
+            
+        self.model.eval()
+        
+        train_csv = os.path.join(pkg_dir, 'SWCNT_synthetic_10000_train.csv')
+        if not os.path.exists(train_csv):
+            train_csv = os.path.join(pkg_dir, 'SWCNT_synthetic_5000_complete.csv')
+            
+        if os.path.exists(train_csv):
+            import pandas as pd
+            df_bg = pd.read_csv(train_csv).ffill().bfill()
+            self.X_bg = df_bg[INPUT_FEATURES].sample(n=min(50, len(df_bg)), random_state=42).values
+        else:
+            self.X_bg = np.zeros((10, len(INPUT_FEATURES)))
+
+# ------------------------------------------------------------------------------
+# 6. REST API HANDLER & HTTP SERVER
+# ------------------------------------------------------------------------------
 class APIHandler(BaseHTTPRequestHandler):
+    def _send_cors_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Accept')
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self._send_cors_headers()
+        self.end_headers()
+
     def do_GET(self):
         parsed_path = urlparse(self.path)
         if parsed_path.path == '/api/kan_topology':
+            svc = ModelService.get_instance()
+            extractor = KANTopologyExtractor()
+            topology = extractor.extract_full_topology(svc.model, svc.scaler_X, INPUT_FEATURES, QUALITY_TARGETS)
+            
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
+            self._send_cors_headers()
             self.end_headers()
-            
-            model = KAN(layers_hidden=[len(INPUT_FEATURES), 16, len(QUALITY_TARGETS)], grid_size=3)
-            extractor = KANTopologyExtractor()
-            topology = extractor.extract_full_topology(model, DummyScaler(), INPUT_FEATURES, QUALITY_TARGETS)
-            
-            self.wfile.write(json.dumps(topology).encode())
+            self.wfile.write(json.dumps(topology).encode('utf-8'))
+        elif parsed_path.path == '/api/health':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self._send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({'status': 'healthy', 'model': 'PI-VRBF-KAN', 'port': 8051}).encode('utf-8'))
         else:
             self.send_response(404)
+            self._send_cors_headers()
             self.end_headers()
-            
+
     def do_POST(self):
         parsed_path = urlparse(self.path)
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length)
-        body = json.loads(post_data.decode('utf-8'))
-        
+        try:
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length) if content_length > 0 else b'{}'
+            body = json.loads(post_data.decode('utf-8')) if post_data else {}
+        except Exception as e:
+            self.send_response(400)
+            self.send_header('Content-type', 'application/json')
+            self._send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': f'Invalid JSON payload: {str(e)}'}).encode('utf-8'))
+            return
+
+        svc = ModelService.get_instance()
+
         if parsed_path.path == '/api/shap_attributions':
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            
-            model = KAN(layers_hidden=[len(INPUT_FEATURES), 16, len(QUALITY_TARGETS)], grid_size=3)
             engine = SHAPAttributionEngine()
+            raw_sp = body.get('current_setpoints', {})
             
-            X_bg = np.zeros((10, len(INPUT_FEATURES)))
-            X_inst = np.array([body.get('current_setpoints', np.zeros(len(INPUT_FEATURES)).tolist())])
-            if X_inst.shape[1] != len(INPUT_FEATURES):
-                X_inst = np.zeros((1, len(INPUT_FEATURES)))
-                
-            res = engine.compute_shap_values(model, X_bg, X_inst, DummyScaler(), DummyScaler())
-            self.wfile.write(json.dumps(res).encode())
-            
+            if isinstance(raw_sp, dict) and len(raw_sp) > 0:
+                import pandas as pd
+                from nopo_paper_pkg.synthetic_generator import calculate_secondary_parameters
+                df_sp = pd.DataFrame([raw_sp])
+                defaults = {'P_CO_atm': 60.0, 'T_rxn_mean_C': 950.0, 'T_spread_C': 25.0,
+                            'Flow_CO_SLPM': 600.0, 'Flow_Fe_Precursor_SLPM': 190.0,
+                            'H2O_Flow_ppmv': 20.0, 'Zone_SP_Dev_C': -5.0}
+                for k, v in defaults.items():
+                    if k not in df_sp.columns:
+                        df_sp[k] = v
+                df_sec = calculate_secondary_parameters(df_sp)
+                X_inst = pd.concat([df_sp, df_sec], axis=1)[INPUT_FEATURES].values[0]
+            elif isinstance(raw_sp, list) and len(raw_sp) == len(INPUT_FEATURES):
+                X_inst = np.array(raw_sp)
+            else:
+                X_inst = svc.X_bg.mean(axis=0)
+
+            res = engine.compute_shap_values(svc.model, svc.X_bg, X_inst, svc.scaler_X, svc.scaler_Y)
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self._send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(res).encode('utf-8'))
+
         elif parsed_path.path == '/api/active_learning_recommend':
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            
-            model = KAN(layers_hidden=[len(INPUT_FEATURES), 16, len(QUALITY_TARGETS)], grid_size=3)
             rec = ActiveLearningRecommender()
-            res = rec.recommend_next_batch(model, DummyScaler(), DummyScaler())
-            self.wfile.write(json.dumps(res).encode())
-            
-        elif parsed_path.path == '/api/validate_thermodynamics':
+            n_cands = int(body.get('n_candidates', 5))
+            res = rec.recommend_next_batch(svc.model, svc.scaler_X, svc.scaler_Y, n_candidates=n_cands)
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
+            self._send_cors_headers()
             self.end_headers()
-            
+            self.wfile.write(json.dumps(res).encode('utf-8'))
+
+        elif parsed_path.path == '/api/validate_thermodynamics':
             val = ThermodynamicValidator()
             res = val.validate_setpoints(
-                body.get('P_CO_atm', 60.0),
-                body.get('T_rxn_mean_C', 950.0),
-                body.get('Flow_CO_SLPM', 600.0),
-                body.get('Flow_Fe_Precursor_SLPM', 190.0),
-                body.get('H2O_Flow_ppmv', 30.0),
-                body.get('T_spread_C', 25.0),
-                body.get('Zone_SP_Dev_C', -5.0)
+                float(body.get('P_CO_atm', 60.0)),
+                float(body.get('T_rxn_mean_C', 950.0)),
+                float(body.get('Flow_CO_SLPM', 600.0)),
+                float(body.get('Flow_Fe_Precursor_SLPM', 190.0)),
+                float(body.get('H2O_Flow_ppmv', 20.0)),
+                float(body.get('T_spread_C', 25.0)),
+                float(body.get('Zone_SP_Dev_C', -5.0))
             )
-            self.wfile.write(json.dumps(res).encode())
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self._send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(res).encode('utf-8'))
         else:
             self.send_response(404)
+            self._send_cors_headers()
             self.end_headers()
 
 def run_server(port=8051):
     server_address = ('', port)
+    ModelService.get_instance()
     httpd = HTTPServer(server_address, APIHandler)
-    print(f'Starting httpd on port {port}...')
+    print(f'Starting HiPCO KAN Topology API server on port {port}...')
     httpd.serve_forever()
 
 if __name__ == '__main__':
@@ -371,52 +454,36 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     if args.test:
-        print("Running tests...")
+        print("Running tests on hardened KAN Topology API...")
+        svc = ModelService.get_instance()
         
-        # 1. Load Model (Mocking if missing)
-        model_path = os.path.join(os.path.dirname(__file__), 'kan_pretrained.pt')
-        model = KAN(layers_hidden=[len(INPUT_FEATURES), 16, len(QUALITY_TARGETS)], grid_size=3)
-        scaler_X = DummyScaler()
-        scaler_Y = DummyScaler()
-        
-        if os.path.exists(model_path):
-            ckpt = torch.load(model_path, weights_only=False)
-            model.load_state_dict(ckpt['model_state'] if 'model_state' in ckpt else ckpt)
-            if 'scaler_X' in ckpt:
-                scaler_X = ckpt['scaler_X']
-            if 'scaler_Y' in ckpt:
-                scaler_Y = ckpt['scaler_Y']
-            print("Loaded kan_pretrained.pt")
-        else:
-            print("kan_pretrained.pt not found, using initialized weights")
-        
-        # 2. Extract Topology
+        # 1. Extract Topology
         print("Testing KANTopologyExtractor...")
         extractor = KANTopologyExtractor()
-        topology = extractor.extract_full_topology(model, scaler_X, INPUT_FEATURES, QUALITY_TARGETS)
+        topology = extractor.extract_full_topology(svc.model, svc.scaler_X, INPUT_FEATURES, QUALITY_TARGETS)
         print(f"Topology: {len(topology['nodes'])} nodes, {len(topology['edges'])} edges")
         
-        # 3. SHAP
+        # 2. SHAP
         print("Testing SHAPAttributionEngine...")
         engine = SHAPAttributionEngine()
-        X_bg = np.random.rand(10, len(INPUT_FEATURES))
-        X_inst = np.random.rand(len(INPUT_FEATURES))
-        shap = engine.compute_shap_values(model, X_bg, X_inst, scaler_X, scaler_Y)
+        X_inst = svc.X_bg[0]
+        shap = engine.compute_shap_values(svc.model, svc.X_bg, X_inst, svc.scaler_X, svc.scaler_Y)
         print(f"SHAP feature ranking top 3: {shap['feature_ranking'][:3]}")
         
-        # 4. Active Learning
-        print("Testing ActiveLearningRecommender...")
+        # 3. Active Learning
+        print("Testing ActiveLearningRecommender with authentic secondary physics...")
         rec = ActiveLearningRecommender()
-        recs = rec.recommend_next_batch(model, scaler_X, scaler_Y)
-        print(f"Generated {len(recs)} recommendations. Top score: {recs[0]['uncertainty_score']:.4f}")
+        recs = rec.recommend_next_batch(svc.model, svc.scaler_X, svc.scaler_Y, n_candidates=5)
+        print(f"Generated {len(recs)} recommendations. Top uncertainty: {recs[0]['uncertainty_score']:.4f}")
         
-        # 5. Thermodynamics
+        # 4. Thermodynamics
         print("Testing ThermodynamicValidator...")
         val = ThermodynamicValidator()
         thermo = val.validate_setpoints(60.0, 950.0, 600.0, 190.0, 30.0, 25.0, -5.0)
-        print(f"Thermodynamic score: {thermo['feasibility_score']}")
+        print(f"Thermodynamic feasibility score: {thermo['feasibility_score']}/100")
         
-        print("\nAll tests passed successfully.")
+        print("[OK] All backend scientific modules passed tests successfully.")
+        import sys
         sys.exit(0)
         
     if args.serve:

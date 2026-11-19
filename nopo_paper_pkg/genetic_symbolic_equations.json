@@ -1,0 +1,12 @@
+{
+  "Raman_G_D_Rate_Law": {
+    "latex_equation": "e^{e^{0.924}}",
+    "r2_score": 0.0,
+    "tree_complexity": 3
+  },
+  "SWCNT_Yield_Rate_Law": {
+    "latex_equation": "e^{\\ln(|1.845|)}",
+    "r2_score": 0.0,
+    "tree_complexity": 3
+  }
+}

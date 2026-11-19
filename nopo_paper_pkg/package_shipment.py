@@ -12,14 +12,18 @@ root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 zip_dest = os.path.join(root_dir, "HiPCO_KAN_Shipment_Package.zip")
 
 INCLUDE_FILES = [
+    "HOW_TO_RUN.txt",
     "README.md",
     "RUN_APP.bat",
     "RUN_APP.sh",
     "launcher.py",
     "hipco_kan_dss_app.html",
+    "HiPCO_KAN_Research_Paper.pdf",
+    "HiPCO_KAN_Research_Paper.docx",
     "HiPCO_KAN_Comprehensive_Guide.pdf",
     "HiPCO_KAN_Review_Panel_Presentation.pptx",
-    "review_panel_presentation.html"
+    "review_panel_presentation.html",
+    "presentation_defense_evidence.md"
 ]
 
 INCLUDE_DIRS = [

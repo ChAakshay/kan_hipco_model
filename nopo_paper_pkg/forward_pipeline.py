@@ -83,24 +83,31 @@ def load_and_preprocess_real_data():
     return X_df.values, Y_df.values
 
 # ------------------------------------------------------------------------------
-# STEP 22: Pre-train KAN on Synthetic Dataset
+# STEP 22: Pre-train KAN on 10,000-Sample Multi-Regime Dataset
 # ------------------------------------------------------------------------------
-def pretrain_kan_on_synthetic(epochs=50, lr=0.003):
-    print("--> Step 22: Pre-training PyKAN on Synthetic Dataset (N=5000)...")
-    df_synth = pd.read_excel(LARGE_SYNTH_PATH)
+def pretrain_kan_on_synthetic(epochs=40, lr=0.004, batch_size=128):
+    train_path = os.path.join(OUTPUT_DIR, "SWCNT_synthetic_10000_train.csv")
+    test_path = os.path.join(OUTPUT_DIR, "SWCNT_synthetic_10000_test.csv")
+    ood_path = os.path.join(OUTPUT_DIR, "SWCNT_synthetic_ood_stress.csv")
     
-    X_synth = df_synth[INPUT_FEATURES].ffill().bfill().values
-    Y_synth = df_synth[QUALITY_TARGETS].ffill().bfill().values
+    if not os.path.exists(train_path):
+        train_path = os.path.join(OUTPUT_DIR, "SWCNT_synthetic_5000_complete.csv")
+        
+    print(f"--> Step 22: Pre-training PI-VRBF-KAN on Expanded Multi-Regime Dataset ({train_path})...")
+    df_train = pd.read_csv(train_path).ffill().bfill()
+    
+    X_train = df_train[INPUT_FEATURES].values
+    Y_train = df_train[QUALITY_TARGETS].values
     
     scaler_X = StandardScaler()
     scaler_Y = StandardScaler()
     
-    X_scaled = scaler_X.fit_transform(X_synth)
-    Y_scaled = scaler_Y.fit_transform(Y_synth)
+    X_train_s = scaler_X.fit_transform(X_train)
+    Y_train_s = scaler_Y.fit_transform(Y_train)
     
-    dataset = torch.utils.data.TensorDataset(torch.tensor(X_scaled, dtype=torch.float32),
-                                            torch.tensor(Y_scaled, dtype=torch.float32))
-    loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=True)
+    dataset = torch.utils.data.TensorDataset(torch.tensor(X_train_s, dtype=torch.float32),
+                                            torch.tensor(Y_train_s, dtype=torch.float32))
+    loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
     
     model = KAN(layers_hidden=[len(INPUT_FEATURES), 16, len(QUALITY_TARGETS)], grid_size=3)
     optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-3)
@@ -112,17 +119,59 @@ def pretrain_kan_on_synthetic(epochs=50, lr=0.003):
         for bx, by in loader:
             optimizer.zero_grad()
             out = model(bx)
-            loss = criterion(out, by)
+            loss_mse = criterion(out, by)
+            # L1 sparsity penalty on splines
+            loss_reg = 0.0005 * model.l1_regularization()
+            loss = loss_mse + loss_reg
             loss.backward()
             optimizer.step()
-            total_loss += loss.item() * len(bx)
+            total_loss += loss_mse.item() * len(bx)
         if (epoch + 1) % 10 == 0:
-            print(f"    Epoch {epoch+1}/{epochs} - Pre-training MSE Loss: {total_loss / len(X_synth):.4f}")
+            print(f"    Epoch {epoch+1}/{epochs} - Pre-training MSE: {total_loss / len(X_train):.5f}")
             
+    # Evaluation on Held-out Test Set
+    metrics_test = {}
+    if os.path.exists(test_path):
+        df_test = pd.read_csv(test_path).ffill().bfill()
+        X_test_s = scaler_X.transform(df_test[INPUT_FEATURES].values)
+        Y_test_true = df_test[QUALITY_TARGETS].values
+        
+        model.eval()
+        with torch.no_grad():
+            pred_test_s = model(torch.tensor(X_test_s, dtype=torch.float32)).numpy()
+        pred_test_Y = scaler_Y.inverse_transform(pred_test_s)
+        
+        for i, tgt in enumerate(QUALITY_TARGETS):
+            r2 = r2_score(Y_test_true[:, i], pred_test_Y[:, i])
+            mae = mean_absolute_error(Y_test_true[:, i], pred_test_Y[:, i])
+            metrics_test[tgt] = {'r2': float(r2), 'mae': float(mae)}
+            
+        mean_test_r2 = np.mean([m['r2'] for m in metrics_test.values()])
+        print(f"[OK] Held-Out Test Evaluation across 9 Targets: Mean R2 = {mean_test_r2:.4f}")
+        
+    # Evaluation on Out-of-Distribution (OOD) Stress Set
+    metrics_ood = {}
+    if os.path.exists(ood_path):
+        df_ood = pd.read_csv(ood_path).ffill().bfill()
+        X_ood_s = scaler_X.transform(df_ood[INPUT_FEATURES].values)
+        Y_ood_true = df_ood[QUALITY_TARGETS].values
+        with torch.no_grad():
+            pred_ood_s = model(torch.tensor(X_ood_s, dtype=torch.float32)).numpy()
+        pred_ood_Y = scaler_Y.inverse_transform(pred_ood_s)
+        for i, tgt in enumerate(QUALITY_TARGETS):
+            r2 = r2_score(Y_ood_true[:, i], pred_ood_Y[:, i])
+            metrics_ood[tgt] = {'r2': float(r2)}
+        mean_ood_r2 = np.mean([m['r2'] for m in metrics_ood.values()])
+        print(f"[OK] Out-of-Distribution Stress Test: Mean R2 = {mean_ood_r2:.4f}")
+        
     torch.save({
         'model_state': model.state_dict(),
         'scaler_X': scaler_X,
-        'scaler_Y': scaler_Y
+        'scaler_Y': scaler_Y,
+        'input_features': INPUT_FEATURES,
+        'quality_targets': QUALITY_TARGETS,
+        'metrics_test': metrics_test,
+        'metrics_ood': metrics_ood
     }, PRETRAINED_CHECKPOINT)
     print(f"[OK] Saved Pre-trained KAN Checkpoint: {PRETRAINED_CHECKPOINT}")
     return model, scaler_X, scaler_Y

@@ -1,0 +1,80 @@
+[
+  {
+    "status": "converged",
+    "latency_ms": 1799.17,
+    "target": {
+      "CO2_Conversion_pct": 35.0,
+      "Energy_Efficiency_pct": 48.0
+    },
+    "achieved": {
+      "CO2_Conversion_pct": 35.08,
+      "Energy_Efficiency_pct": 47.95,
+      "Specific_Energy_Consumption_kJ_mol": 563.7
+    },
+    "conversion_error_pct": 0.08,
+    "efficiency_error_pct": 0.05,
+    "recommended_recipe": {
+      "Discharge_Power_W": 141.8,
+      "Gas_Flow_Rate_LPM": 1.155,
+      "Operating_Pressure_bar": 0.927,
+      "Discharge_Gap_mm": 2.37,
+      "Discharge_Length_mm": 294.4,
+      "AC_Frequency_kHz": 100.0,
+      "Specific_Energy_Input_kJ_L": 7.37,
+      "Specific_Energy_Input_eV_molec": 1.709,
+      "Residence_Time_s": 1.912
+    }
+  },
+  {
+    "status": "converged",
+    "latency_ms": 193.73,
+    "target": {
+      "CO2_Conversion_pct": 55.0,
+      "Energy_Efficiency_pct": 38.0
+    },
+    "achieved": {
+      "CO2_Conversion_pct": 55.07,
+      "Energy_Efficiency_pct": 38.0,
+      "Specific_Energy_Consumption_kJ_mol": 676.3
+    },
+    "conversion_error_pct": 0.07,
+    "efficiency_error_pct": 0.0,
+    "recommended_recipe": {
+      "Discharge_Power_W": 158.3,
+      "Gas_Flow_Rate_LPM": 0.539,
+      "Operating_Pressure_bar": 0.787,
+      "Discharge_Gap_mm": 2.63,
+      "Discharge_Length_mm": 171.5,
+      "AC_Frequency_kHz": 99.0,
+      "Specific_Energy_Input_kJ_L": 17.6,
+      "Specific_Energy_Input_eV_molec": 4.084,
+      "Residence_Time_s": 2.277
+    }
+  },
+  {
+    "status": "converged",
+    "latency_ms": 190.52,
+    "target": {
+      "CO2_Conversion_pct": 70.0,
+      "Energy_Efficiency_pct": 28.0
+    },
+    "achieved": {
+      "CO2_Conversion_pct": 69.73,
+      "Energy_Efficiency_pct": 27.9,
+      "Specific_Energy_Consumption_kJ_mol": 1027.1
+    },
+    "conversion_error_pct": 0.27,
+    "efficiency_error_pct": 0.1,
+    "recommended_recipe": {
+      "Discharge_Power_W": 233.2,
+      "Gas_Flow_Rate_LPM": 0.513,
+      "Operating_Pressure_bar": 0.765,
+      "Discharge_Gap_mm": 1.03,
+      "Discharge_Length_mm": 141.7,
+      "AC_Frequency_kHz": 78.1,
+      "Specific_Energy_Input_kJ_L": 27.28,
+      "Specific_Energy_Input_eV_molec": 6.329,
+      "Residence_Time_s": 0.689
+    }
+  }
+]

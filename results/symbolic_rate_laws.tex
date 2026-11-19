@@ -1,0 +1,21 @@
+% Distilled Closed-Form Plasma Kinetic Rate Laws
+% SEI -> CO2_Conversion (R^2 = 0.9988)
+\begin{equation}
+  \chi_{\text{CO}_2}(\text{SEI}) = 16.23\% + 59.97\% \cdot \left(1 - \exp\left(-0.010 \cdot \text{SEI}^{1.48}\right)\right)
+\end{equation}
+
+% SEI -> Energy_Efficiency (R^2 = 0.9147)
+\begin{equation}
+  \eta_{\text{EE}}(\text{SEI}) = 58.2\% \cdot \left(1 - \exp\left(-1.00\text{SEI}\right)\right) \cdot \exp\left(-0.031\max(0, \text{SEI} - 5.0)\right)
+\end{equation}
+
+% Pressure -> CO2_Conversion (R^2 = 0.9551)
+\begin{equation}
+  \chi_{\text{CO}_2}(P) = 25.00\% + 31.94(1 - P_{\text{reactor}}) + -25.28(1 - P_{\text{reactor}})^2
+\end{equation}
+
+% Discharge_Gap -> CO2_Conversion (R^2 = 0.8682)
+\begin{equation}
+  \chi_{\text{CO}_2}(d_{\text{gap}}) = 20.74\% + 7.84\left(\frac{1.5\text{ mm}}{d_{\text{gap}}}\right) + -2.50\left(\frac{1.5\text{ mm}}{d_{\text{gap}}}\right)^2
+\end{equation}
+

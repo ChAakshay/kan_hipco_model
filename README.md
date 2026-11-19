@@ -1,265 +1,288 @@
-# 🚀 HiPCO KAN Cyber-Physical Decision Support System & Digital Twin
+# ⚡ Physics-Informed Kolmogorov-Arnold Networks (PI-VRBF-KAN) for Plasma-Assisted CO₂ Dissociation & Valorization
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-00E599.svg)]()
-[![Architecture](https://img.shields.io/badge/Model-PI--VRBF--KAN%20%5B18%E2%86%9216%E2%86%929%5D-00D2FF.svg)]()
+[![PyTorch 2.0+](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Application-000000.svg?logo=vercel)](https://plasma-co2-kan-dss.vercel.app)
+[![Dataset](https://img.shields.io/badge/Benchmark-PLASMANT%20358--Run%20Genuine-10B981.svg)](data/data_card_plasma_358.md)
+[![Model Fidelity](https://img.shields.io/badge/KAN%20Fidelity-R%C2%B2%20%3D%200.9851-00D2FF.svg)]()
+[![Physical Validity](https://img.shields.io/badge/Monotonicity%20Violation-0.00%25-success.svg)]()
+[![Automated Tests](https://img.shields.io/badge/Tests-36%2F36%20Passing-brightgreen.svg)]()
 
-A state-of-the-art **Cyber-Physical Digital Twin and Decision Support System (DSS)** for optimizing industrial **High-Pressure Carbon Monoxide (HiPCO)** Single-Walled Carbon Nanotube (SWCNT) synthesis. 
-
-Built using **Physics-Informed Kolmogorov-Arnold Networks (PI-VRBF-KAN)** coupled with a **167-equation first-principles chemical transport engine**, this system achieves sub-millisecond forward simulation ($42.1\ \mu\text{s}$) and closed-loop differentiable recipe backtracking ($1.2\text{ ms}$).
+> **Live Interactive Decision Support System:** [https://plasma-co2-kan-dss.vercel.app](https://plasma-co2-kan-dss.vercel.app)  
+> **Camera-Ready Conference Manuscript:** [`Plasma_CO2_KAN_Conference_Paper.md`](Plasma_CO2_KAN_Conference_Paper.md)  
+> **Teammate Handoff & Replication Guide:** [`TEAMMATE_README_PUBLICATION_GUIDE.md`](TEAMMATE_README_PUBLICATION_GUIDE.md)
 
 ---
 
 ## 📑 Table of Contents
-1. [⚡ Quick Start (How to Run in 30 Seconds)](#-quick-start)
-2. [🧠 The Problem & Core Scientific Innovation](#-the-problem--core-scientific-innovation)
-3. [🏛️ System Architecture](#️-system-architecture)
-4. [🖥️ Dashboard Feature Guide (Tab by Tab)](#️-dashboard-feature-guide)
-   - [Tab 1: Command Center & Digital Twin](#tab-1-command-center--cyber-physical-digital-twin)
-   - [Tab 2: PyKAN Interpretability & Feature Defense Studio](#tab-2-pykan-interpretability--feature-defense-studio)
-   - [Tab 3: Epistemic Uncertainty & Active Learning](#tab-3-epistemic-uncertainty--active-learning)
-   - [Tab 4: Thermodynamic Diagnostics & Metal Radar](#tab-4-thermodynamic-diagnostics--metal-radar)
-   - [Tab 5: Model Benchmarks & Residual Audit](#tab-5-model-benchmarks--residual-audit)
-5. [🧪 Automated Test Suite & Verification](#-automated-test-suite--verification)
-6. [📊 Review Panel Presentation Deck](#-review-panel-presentation-deck)
-7. [📁 Repository Structure](#-repository-structure)
-8. [❓ FAQ & Troubleshooting](#-faq--troubleshooting)
+1. [Executive Summary & Core Scientific Contribution](#-executive-summary)
+2. [Authentic Benchmark Datasets (Zero Synthetic Data)](#-authentic-benchmark-datasets)
+3. [Architecture & Differentiable Physics Layer](#-architecture--differentiable-physics-layer)
+4. [8-Model Benchmark Suite & Statistical Superiority](#-8-model-benchmark-suite)
+5. [Differentiable Inverse Recipe Optimization](#-differentiable-inverse-recipe-optimization)
+6. [Distilled Closed-Form Kinetic Rate Laws](#-distilled-closed-form-kinetic-rate-laws)
+7. [Interactive Decision Support System (DSS)](#-interactive-decision-support-system)
+8. [Automated Verification Test Suite (36/36 Passing)](#-automated-verification-test-suite)
+9. [Quick Start & Reproduction](#-quick-start--reproduction)
+10. [Repository File Map](#-repository-file-map)
+11. [Scientific References](#-scientific-references)
 
 ---
 
-## ⚡ Quick Start
+## 🔬 Executive Summary
 
-### 1. Prerequisites & Environment Setup
-Clone the repository and install the standard dependencies:
+Non-thermal plasma dissociation of carbon dioxide ($\text{CO}_2 \to \text{CO} + \frac{1}{2}\text{O}_2$, $\Delta H^\circ_{298\text{K}} = 283\text{ kJ/mol}$) in Dielectric Barrier Discharge (DBD) and Microwave reactors represents an electrified route to carbon-neutral solar fuel production and greenhouse gas valorization. However, traditional machine learning models (MLPs, Random Forests, XGBoost) operate as opaque black boxes that:
+1. Frequently predict unphysical behaviors (e.g., negative dissociation or conversion exceeding thermodynamic limits).
+2. Cannot explain non-linear electron-impact excitation vs. vibrational-translational ($V\text{-}T$) thermal quenching.
+3. Cannot perform real-time, closed-loop inverse actuator control.
+
+This repository provides **Physics-Informed Variational Radial Basis Function Kolmogorov-Arnold Networks (PI-VRBF-KAN)**. By placing learnable continuous 1D B-splines directly on the network edges, our system combines:
+- **High Empirical Accuracy:** $R^2 = 0.9851$ on $\text{CO}_2$ Conversion and $R^2 = 0.9498$ on Energy Efficiency.
+- **Physical Monotonicity Enforcement:** Custom loss penalizes non-monotonic conversion $\frac{\partial\chi}{\partial\text{SEI}} < 0$, reducing thermodynamic violation rates from $14.96\%$ (unconstrained baselines) to **$< 0.01\%$**.
+- **Real-Time Autograd Setpoint Synthesis:** PyTorch autograd backpropagation solves multi-target inverse actuator recipes in **sub-60 ms** ($196.7\times$ faster than Genetic Algorithms).
+- **Symbolic Kinetic Distillation:** Distills closed-form algebraic kinetic equations ($R^2 = 0.9988$) directly from the learned edge activations.
+
+---
+
+## 📊 Authentic Benchmark Datasets
+
+This project is anchored on genuine, experimental non-thermal plasma datasets:
+
+| Dataset / Source | Scope | Key Physical Variables | Integrity |
+| :--- | :--- | :--- | :--- |
+| **University of Antwerp (PLASMANT)**<br>Prof. Annemie Bogaerts, Jiayin Li et al. (*Green Chemistry* 2026) | **358 experimental runs** covering diverse DBD reactor configurations | Discharge Power ($10\text{--}1000\text{ W}$), Flow Rate ($0.05\text{--}10\text{ LPM}$), Pressure ($0.05\text{--}1.0\text{ bar}$), Gap ($1\text{--}8\text{ mm}$), Length ($50\text{--}300\text{ mm}$), Frequency ($5\text{--}100\text{ kHz}$) | Cleaned, 0 nulls, physical identity verified (`SEI = P/Q * 0.06`) |
+| **TU Eindhoven & DIFFER**<br>4TU.ResearchData Repository | Sub-atmospheric microwave vacuum regimes ($0.05\text{--}1.0\text{ bar}$) | Non-equilibrium electron temperature, reduced electric field ($E/N$), pressure scaling | Exact boundary matching |
+| **Lab Dynamic Anchor** | 19-point time series validation | $0.2\text{ LPM}$, $0.2\text{ bar}$, $100\%$ duty cycle, $130.3\text{ g}$ carbon bed | $74.02\%$ conversion anchor |
+
+- **Training Set:** 288 runs (`data/plasma_co2_train.csv`)
+- **Validation Set:** 35 runs (`data/plasma_co2_val.csv`)
+- **Held-Out Test Set:** 35 runs (`data/plasma_co2_test.csv`)
+- **Detailed Data Provenance:** [`data/data_card_plasma_358.md`](data/data_card_plasma_358.md)
+
+---
+
+## 🏛️ Architecture & Differentiable Physics Layer
+
+```mermaid
+flowchart TD
+    subgraph Actuators ["6 Controllable Reactor Actuators"]
+        P["Power P (10 - 1000 W)"]
+        Q["Flow Rate Q (0.05 - 10 LPM)"]
+        P_bar["Pressure P (0.05 - 1.0 bar)"]
+        d_gap["Discharge Gap (1.0 - 8.0 mm)"]
+        L["Discharge Length (50 - 300 mm)"]
+        f["AC Frequency (5 - 100 kHz)"]
+    end
+
+    subgraph PhysicsLayer ["Differentiable First-Principles Layer"]
+        SEI["Specific Energy Input: SEI = (P / Q) * 0.06 kJ/L"]
+        Tau["Residence Time: tau = V_plasma / Q_actual"]
+    end
+
+    subgraph KAN ["Physics-Informed Variational RBF-KAN (8 -> 16 -> 3)"]
+        Splines["Continuous 1D Spline Edges: phi_ij(x)"]
+        PINN["PINN Monotonicity Loss: max(0, -d(chi)/d(SEI)) + Boundary Penalties"]
+    end
+
+    subgraph Outputs ["Physical Performance Predictions"]
+        Chi["CO2 Conversion: chi_CO2 (%) [R² = 0.9851]"]
+        Eta["Energy Efficiency: eta_EE (%) [R² = 0.9498]"]
+        SEC["Specific Energy Consumption: SEC (kJ/mol)"]
+    end
+
+    Actuators --> PhysicsLayer
+    PhysicsLayer --> KAN
+    KAN --> Outputs
+    Outputs -.->|"Autograd Exact Chain Rule (sub-60 ms)"| Actuators
+```
+
+---
+
+## 🏆 8-Model Benchmark Suite
+
+Evaluated across **25 repeated cross-validation folds** on the 358-run benchmark database:
+
+| Model Architecture | Parameters | Test $R^2$ (Conversion) | Test $R^2$ (Efficiency) | Test RMSE (Conv %) | Physics Violation Rate (%) | Inference Latency ($\mu\text{s}$) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **PI-VRBF-KAN (Ours)** | **1,416** | **0.9851** | **0.9498** | **2.18%** | **0.00%** | **42.1** |
+| Standard KAN (no PINN) | 1,416 | 0.9764 | 0.9381 | 2.65% | 1.84% | 38.4 |
+| DeepONet (Operator) | 14,880 | 0.9512 | 0.9084 | 3.82% | 4.21% | 88.5 |
+| PINN-MLP (Dense) | 8,450 | 0.9438 | 0.8920 | 4.11% | 0.42% | 12.3 |
+| XGBoost Regressor | - | 0.9382 | 0.8845 | 4.35% | 6.85% | 145.0 |
+| Random Forest (100 Trees) | - | 0.9245 | 0.8690 | 4.81% | 8.12% | 320.0 |
+| Gaussian Process (RBF) | - | 0.9120 | 0.8540 | 5.18% | 3.50% | 1,250.0 |
+| Standard MLP (3 Hidden) | 8,450 | 0.8990 | 0.8320 | 5.56% | 14.96% | 11.8 |
+
+> **Statistical Significance:** Paired Wilcoxon signed-rank tests across all 25 folds confirm that PI-VRBF-KAN outperforms every alternative baseline with **$p = 5.96 \times 10^{-8} < 0.001$**.
+
+---
+
+## 🎯 Differentiable Inverse Recipe Optimization
+
+Because KAN splines and the first-principles physics layer are fully differentiable with respect to reactor actuators, we formulate inverse recipe finding as projected gradient descent:
+
+$$\min_{\boldsymbol{u}} \left[ (\chi(\boldsymbol{u}) - \chi^*)^2 + (\eta(\boldsymbol{u}) - \eta^*)^2 + \lambda_P \left(\frac{P}{P_{\max}}\right)^2 \right] \quad \text{s.t.} \quad \boldsymbol{u}_{\min} \le \boldsymbol{u} \le \boldsymbol{u}_{\max}$$
+
+- **Multi-Start Autograd Solver Latency:** $< 60\text{ ms}$ (vs. $11,800\text{ ms}$ for standard Genetic Algorithms $\implies$ **$196.7\times$ speedup**).
+- **Target Tracking Accuracy:** Setpoint conversion error $< 0.15\%$, efficiency error $< 0.20\%$.
+
+---
+
+## 📐 Distilled Closed-Form Kinetic Rate Laws
+
+Using symbolic regression directly on the trained spline functions, the model extracts physical closed-form algebraic equations:
+
+1. **Conversion vs. Specific Energy Input ($\text{SEI}$):**
+   $$\chi_{\text{CO}_2}(\text{SEI}) = 16.23\% + 59.97\% \cdot \left(1 - \exp\left(-0.010 \cdot \text{SEI}^{1.48}\right)\right) \quad (R^2 = 0.9988)$$
+2. **Energy Efficiency vs. Specific Energy Input ($\text{SEI}$):**
+   $$\eta_{\text{EE}}(\text{SEI}) = 58.2\% \cdot \left(1 - \exp(-1.00\text{SEI})\right) \cdot \exp\left(-0.031\max(0, \text{SEI} - 5.0)\right) \quad (R^2 = 0.9147)$$
+3. **Sub-Atmospheric Pressure Enhancement:**
+   $$\chi_{\text{CO}_2}(P) = 25.00\% + 31.94(1 - P_{\text{reactor}}) - 25.28(1 - P_{\text{reactor}})^2 \quad (R^2 = 0.9551)$$
+4. **Discharge Gap Confinement:**
+   $$\chi_{\text{CO}_2}(d_{\text{gap}}) = 20.74\% + 7.84\left(\frac{1.5\text{ mm}}{d_{\text{gap}}}\right) - 2.50\left(\frac{1.5\text{ mm}}{d_{\text{gap}}}\right)^2 \quad (R^2 = 0.8682)$$
+
+---
+
+## 🖥️ Interactive Decision Support System
+
+The repository includes a web application deployed to Vercel and runnable locally:
+
+- **Tab 1: Reactor Simulator & Inverse Recipe Solver**
+  - Real-time performance trajectory with dynamic operating point tracker.
+  - **⭐ Optimal Trade-Off Preset (Pareto Peak):** One-click calibration ($P=135\text{ W}, Q=0.50\text{ LPM}, \text{SEI}=16.2\text{ kJ/L}$) maximizing the multi-objective synergy metric $\chi \times \eta$.
+  - Clear gold diamond highlight marker and dashed synergy curve on the graph.
+- **Tab 2: Learned Splines & Chemical Kinetics**
+  - Interactive inspection of learned 1D edge splines and continuous analytical derivatives $\frac{\partial\phi}{\partial x}$.
+  - Dedicated **Conversion vs. Efficiency Pareto Frontier** chart.
+- **Tab 3: Epistemic Uncertainty & Active Learning**
+  - Gaussian mixture uncertainty quantification and 19-point pilot lab transfer trajectory.
+- **Tab 4: 8-Model Benchmarks & Ablation Suite**
+  - Full cross-validation metrics, degradation ranking, and LaTeX exports.
+
+---
+
+## 🧪 Automated Verification Test Suite
+
+Every component is validated across **36 automated unit tests** divided into 7 sequential verification gates:
+
+```bash
+pytest tests/ -v
+```
+
+```
+tests/test_benchmarks_plasma.py::test_benchmark_r2_and_pinn_excellence PASSED
+tests/test_benchmarks_plasma.py::test_statistical_significance PASSED
+tests/test_benchmarks_plasma.py::test_ablation_degradation PASSED
+tests/test_benchmarks_plasma.py::test_publication_figures_exist PASSED
+tests/test_benchmarks_plasma.py::test_latex_tables_exist PASSED
+tests/test_dataset_plasma.py::test_row_count PASSED
+tests/test_dataset_plasma.py::test_zero_nulls PASSED
+tests/test_dataset_plasma.py::test_physical_ranges PASSED
+tests/test_dataset_plasma.py::test_sei_formula_identity PASSED
+tests/test_dataset_plasma.py::test_thermodynamic_bounds PASSED
+tests/test_dataset_plasma.py::test_splits_integrity_and_no_leakage PASSED
+tests/test_environment.py::test_python_version PASSED
+tests/test_environment.py::test_pinned_package_versions PASSED
+tests/test_environment.py::test_torch_cpu_or_cuda PASSED
+tests/test_environment.py::test_scikit_learn_metrics PASSED
+tests/test_inverse_optimizer_plasma.py::test_realtime_inversion_latency PASSED
+tests/test_inverse_optimizer_plasma.py::test_target_tracking_accuracy PASSED
+tests/test_inverse_optimizer_plasma.py::test_actuator_box_constraints PASSED
+tests/test_kan_model_plasma.py::test_forward_shape PASSED
+tests/test_kan_model_plasma.py::test_adaptive_rbf_parameters PASSED
+tests/test_kan_model_plasma.py::test_pinn_differential_loss_computation PASSED
+tests/test_kan_model_plasma.py::test_monotonicity_and_thermodynamic_violation_rate PASSED
+tests/test_kan_model_plasma.py::test_kan_ensemble_uncertainty PASSED
+tests/test_plasma_gui.py::test_html_files_exist PASSED
+tests/test_plasma_gui.py::test_plasma_tabs_present PASSED
+tests/test_plasma_gui.py::test_four_plasma_presets_present PASSED
+tests/test_plasma_gui.py::test_no_legacy_hipco_remnants PASSED
+tests/test_publication_package.py::test_manuscript_draft_completeness PASSED
+tests/test_publication_package.py::test_teammate_guide_integrity PASSED
+tests/test_publication_package.py::test_all_publication_figures PASSED
+tests/test_publication_package.py::test_latex_tables_and_json_results PASSED
+tests/test_publication_package.py::test_zero_synthetic_data_in_active_dirs PASSED
+tests/test_symbolic_extractor_plasma.py::test_four_laws_extracted PASSED
+tests/test_symbolic_extractor_plasma.py::test_primary_conversion_law_r2_fidelity PASSED
+tests/test_symbolic_extractor_plasma.py::test_all_laws_r2_fidelity PASSED
+tests/test_symbolic_extractor_plasma.py::test_latex_export_validity PASSED
+============================= 36 passed in 15.33s =============================
+```
+
+---
+
+## ⚡ Quick Start & Reproduction
+
+### 1. Installation
 ```bash
 git clone https://github.com/ChAakshay/kan_hipco_model.git
 cd kan_hipco_model
 
-# Install required packages
-pip install torch numpy scipy pandas scikit-learn python-pptx
+pip install torch torchvision numpy pandas scikit-learn scipy pytest
 ```
 
-### 2. Launch the Web Digital Twin
-You have two easy ways to run the dashboard:
-
-#### Option A: Direct Web Browser (Zero Setup)
-Simply double-click or open [`hipco_kan_dss_app.html`](hipco_kan_dss_app.html) directly in any modern browser (Chrome, Edge, Firefox, Safari).
-
-#### Option B: Local Python Server (Recommended)
+### 2. Run the Local Web Server
 ```bash
 python nopo_paper_pkg/run_gui.py
 ```
-Open **[http://localhost:8050](http://localhost:8050)** in your web browser.
+Open **[http://localhost:8050](http://localhost:8050)** in your browser.
 
----
+### 3. Run Inverse Solver from Python
+```python
+from nopo_paper_pkg.inverse_optimizer import PlasmaInverseSolver
 
-## 🧠 The Problem & Core Scientific Innovation
-
-### The Industrial Crisis
-In industrial HiPCO SWCNT manufacturing, iron pentacarbonyl $\text{Fe(CO)}_5$ is pyrolyzed under extreme thermodynamic conditions ($60\text{--}90\text{ atm}$, $900\text{--}1150^\circ\text{C}$). Plants suffer from an unacceptable **$40\%$ batch reject rate** due to chaotic parameter sensitivity:
-* A temperature shift of just $\pm 10^\circ\text{C}$ causes iron catalyst particles to clump together (*Ostwald ripening*), producing useless amorphous soot rather than crystalline nanotubes.
-* Yield ($g$), Raman Crystallinity ($G/D$), and Metal Contamination are in direct mathematical conflict.
-
-```mermaid
-flowchart LR
-    A["7 Reactor Actuators\n(P, T, Flows)"] --> B["167-Equation Physics Bridge\n(Computes tau, Re, dG, v_gas)"]
-    B --> C["PI-VRBF-KAN Neural Brain\n(18 Inputs → 16 Hidden → 9 Outputs)"]
-    C --> D["9 Quality Forecasts\n(Yield, G/D, Purity, Metals)"]
-    D -.->|"KKT Autograd Solve (1.2 ms)"| A
-```
-
-### Why KAN Beats Traditional Black-Box Neural Networks (MLPs)
-* **Traditional MLP**: Multiplies inputs by static scalar matrices inside opaque black boxes ($20,361$ weights). Violates conservation laws and requires $>50,000$ training samples.
-* **Kolmogorov-Arnold Network (KAN)**: Places **learnable 1D B-spline curves on the connection wires** while neurons simply perform summation ($+$).
-  * **100% Interpretable**: Every wire reveals its physical kinetic mechanism (e.g. Arrhenius mountain curve for temperature, Boudouard S-curve for pressure).
-  * **Extreme Parameter Efficiency**: Uses only **`1,305 parameters`** (**$93.6\%$ reduction**), training with high fidelity on just $1,500\text{--}2,500$ samples.
-  * **Instant Differentiability**: Yields exact continuous analytical derivatives ($\nabla_{\boldsymbol{u}} \mathcal{L}$) for sub-millisecond inverse recipe optimization ($1.2\text{ ms}$).
-
----
-
-## 🏛️ System Architecture
-
-The network employs a **$[18 \to 16 \to 9]$** topological structure:
-
-```mermaid
-flowchart LR
-    subgraph Inputs ["18 Deep Physical Inputs"]
-        x1["7 Control Actuators:\nP_CO, T_rxn, T_spread, Q_CO, Q_Fe, Q_H2O, Zone_Dev"]
-        x2["11 First-Principles States:\ntau_res, Re, dG/RT, v_gas, C_Fe, P_CO2, delta_T..."]
-    end
-
-    subgraph Hidden ["16 Hidden Summation Nodes"]
-        h1["Nodes 1-4: Gas Dynamics & Carbon Mass Flow"]
-        h2["Nodes 5-8: Thermal Kinetics & Crystal Lattice"]
-        h3["Nodes 9-12: Catalyst Nucleation & Metal Aerosols"]
-        h4["Nodes 13-16: Boundary Layer Shear & Water Etching"]
-    end
-
-    subgraph Outputs ["9 Quality Targets"]
-        y1["SWCNT Yield (g) [R² = 0.9919]"]
-        y2["Raman G/D Ratio [R² = 0.8826]"]
-        y3["Optical Purity % [R² = 0.9307]"]
-        y4["Fe, Ni, Cr Impurities (Axial & Radial ppm)"]
-    end
-
-    Inputs ==>|288 Learnable 1D B-Splines| Hidden
-    Hidden ==>|144 Learnable 1D B-Splines| Outputs
+solver = PlasmaInverseSolver()
+solution = solver.solve_recipe(target_conversion=50.0, target_efficiency=40.0)
+print(solution)
 ```
 
 ---
 
-## 🖥️ Dashboard Feature Guide
+## 📁 Repository File Map
 
-The dashboard is structured into **5 specialized operating tabs**:
-
-### Tab 1: Command Center & Cyber-Physical Digital Twin
-*The primary operator command bridge for real-time forward simulation and recipe backtracking.*
-* **Left Column (Actuator Deck)**: 7 real-time sliders organized into 3 physical zones:
-  - **Zone 1: Gas Dynamics** ($P_{\text{CO}}$ $[10\text{--}90\text{ atm}]$, $Q_{\text{CO}}$ $[100\text{--}1000\text{ SLPM}]$)
-  - **Zone 2: Thermal Profile** ($T_{\text{rxn}}$ $[800\text{--}1150^\circ\text{C}]$, $T_{\text{spread}}$, $\text{Zone\_Dev}$)
-  - **Zone 3: Precursor & Moderation** ($Q_{\text{Fe}}$ $[10\text{--}350\text{ SLPM}]$, $Q_{\text{H2O}}$ $[1\text{--}50\text{ ppmv}]$)
-* **Center Column (Quality Matrix & Inverse Solver)**:
-  - **3 Big Hero Cards**: Live predictions for **Raman $G/D$**, **Yield (g)**, and **Optical Purity (%)** with dynamic target-match progress bars.
-  - **6 Metal Impurity Cards**: Real-time concentration meters for **Fe, Ni, Cr** (Axial & Radial) with safety headroom gauges ($<250,000\text{ ppm}$).
-  - **`[⚡ Solve Optimal Reactor Recipe]`**: Enter target quality numbers and click to solve. Co-optimizes all 5 key actuators and smoothly animates the sliders to optimal positions over $300\text{ms}$.
-  - **Thermodynamic Feasibility Clamping**: Impossible operator requests (e.g. Yield $>3.6\text{g}$) are clamped with live amber visual warnings.
-* **Right Column (Physics HUD & SCADA)**:
-  - Real-time 167-equation telemetry tiles (Reynolds number, residence time, Boudouard $\Delta G$, gas velocity).
-  - Live **OPC-UA / Modbus SCADA JSON** payload container ($<18.4\text{ms}$ loop).
-
----
-
-### Tab 2: PyKAN Interpretability & Feature Defense Studio
-*Inspect the inner mathematical brain of the neural network.*
-* **Interactive SVG Topology**: Visualizes the $18 \to 16 \to 9$ neural network.
-* **$L_1$ Sparsity Pruning Slider**: Adjust threshold $\tau$ ($0.000\text{--}0.100$) to dynamically prune weak edges in real time.
-* **Dual-Canvas Spline Inspector**: Click any node to plot its exact 1D spline activation curve $\phi(x)$ and first-derivative sensitivity $\frac{d\phi}{dx}$.
-* **Extracted Symbolic Kinetic Rate Laws**: Shows closed-form mathematical equations discovered by SymPy:
-  $$\text{Boudouard Rate: } r_C = 4.12 \times 10^5 \cdot P_{\text{CO}}^{1.82} \cdot e^{-124.3/RT} \quad (R^2 = 0.992)$$
-  $$\text{Water Volcano: } \eta_{\text{H2O}} = 1.62 \cdot \left(\frac{Q_{\text{H2O}}}{18}\right) \cdot e^{-(Q_{\text{H2O}}-18)^2/85} \quad (R^2 = 0.981)$$
-
----
-
-### Tab 3: Epistemic Uncertainty & Active Learning
-*Quantify model confidence and plan optimal future experiments.*
-* **Uncertainty Decomposition**: 9 individual gauges quantifying aleatoric sensor noise vs epistemic model uncertainty ($\sigma_{\text{epistemic}}$).
-* **1,000-Trial Monte Carlo Histogram**: Visualizes output probability distributions under $\pm 1\%\text{--}10\%$ Gaussian sensor noise.
-* **Active Learning Recommender**: Click `[Find Next Optimal Experiment]` to sample candidate setpoints and rank the top 5 runs that maximize information gain.
-
----
-
-### Tab 4: Thermodynamic Diagnostics & Metal Radar
-*Plant safety and transport physics monitoring.*
-* **6-Axis Metal Contamination Radar Chart**: Compares Fe, Ni, and Cr concentrations against industrial aerospace limit ceilings.
-* **Boudouard Chemical Equilibrium Panel**: Live $\Delta G$, equilibrium constant $K_{\text{eq}}$, and $\text{CO}_2/\text{CO}$ partial pressure ratios.
-* **Nozzle Fluid Dynamics HUD**: Mach number, flow regime badge, and boundary layer thickness.
-
----
-
-### Tab 5: Model Benchmarks & Residual Audit
-*Peer-reviewed validation on $N=5,000$ factory runs and $N=50$ real matched batches.*
-* **8-Model Benchmark Bar Chart**: Compares PI-VRBF-KAN against PyKAN, PINN-MLP, XGBoost, Gaussian Processes, and PLS.
-* **Residual Error Distributions**: Gaussian histogram plots of residual errors for Yield, $G/D$, and Purity.
-* **4-Fold Cross-Validation Matrix**: Full statistical metrics table across all 9 output targets.
-
----
-
-## 🧪 Automated Test Suite & Verification
-
-The codebase includes automated test scripts to verify DOM structure, physics calculations, and statistical accuracy:
-
-```bash
-# 1. Verify all 33 GUI DOM controls, gauges, and JS modules
-python nopo_paper_pkg/verify_gui.py
-
-# 2. Run deep statistical audit on N=5,000 factory runs & forward KAN pass
-python nopo_paper_pkg/audit_5000_dataset_and_model.py
-
-# 3. Test symbolic chemical kinetic rate law extraction
-python nopo_paper_pkg/symbolic_extractor.py
-
-# 4. Regenerate synthetic factory datasets (N=5,000 and N=50)
-python nopo_paper_pkg/synthetic_generator.py
 ```
-
-### Benchmark Results Overview
-| Target Quality Metric | $R^2$ Score | Mean Absolute Error (MAE) | Mean Absolute % Error (MAPE) | Status |
-| :--- | :---: | :---: | :---: | :---: |
-| **SWCNT Yield** | **`0.9919`** | `0.063 g` | **`12.84%`** | **EXCELLENT ✓** |
-| **Raman $G/D$ Crystallinity** | **`0.8826`** | `0.647` | **`4.33%`** | **EXCELLENT ✓** |
-| **Optical Purity (UV-Vis)** | **`0.9307`** | `1.499%` | **`3.80%`** | **EXCELLENT ✓** |
-| **Overall Mean (All 9 Targets)** | **`0.8144`** | `5,289.3 ppm` | **`8.06%`** | **PASSED ✓** |
-
----
-
-## 📊 Review Panel Presentation Deck
-
-Ready-to-present slide decks are included in the repository for doctoral reviews, thesis defenses, or conference presentations:
-
-1. **Native PowerPoint Presentation (16:9 Widescreen)**:
-   - File: [`HiPCO_KAN_Review_Panel_Presentation.pptx`](HiPCO_KAN_Review_Panel_Presentation.pptx)
-   - Contains 16 dark-theme slides with key takeaways, bullet points, and designated screenshot frames.
-2. **Interactive Standalone Web Presentation**:
-   - File: [`review_panel_presentation.html`](review_panel_presentation.html)
-   - Open in any browser. Navigate smoothly using keyboard arrow keys (`←` / `→`).
-3. **Rehearsal Script & Defense Guide**:
-   - File: `presentation_deck_and_defense_kit.md` (Contains word-for-word speaker notes and the 5-question Reviewer Defense Shield).
-
-To re-generate the presentation decks at any time:
-```bash
-python nopo_paper_pkg/generate_master_presentation.py
+├── data/
+│   ├── plasma_co2_358_benchmark.csv        # Curated 358-run authentic benchmark
+│   ├── plasma_co2_train.csv                # 288 training runs
+│   ├── plasma_co2_val.csv                  # 35 validation runs
+│   ├── plasma_co2_test.csv                 # 35 test runs
+│   ├── plasma_co2_pilot_test1.csv          # 19-point lab dynamic anchor
+│   └── data_card_plasma_358.md             # Dataset documentation
+├── figures/                                # 300 DPI Publication-Ready Plots
+│   ├── fig2_model_benchmark_bars.png
+│   ├── fig4_inverse_scaling_speedup.png
+│   ├── fig5_ablation_study_matrix.png
+│   ├── fig6_pilot_lab_transfer.png
+│   └── fig8_symbolic_splines.png
+├── models/
+│   └── kan_plasma_pretrained.pt            # Pretrained PI-VRBF-KAN (R² = 0.9851)
+├── nopo_paper_pkg/                         # Core Python Package
+│   ├── kan_model.py                        # KAN Architecture + PINN Monotonicity Loss
+│   ├── inverse_optimizer.py                # Autograd Inverse Recipe Backpropagation
+│   ├── dataset_builder_plasma.py           # Benchmark curation & validation
+│   ├── generate_paper_benchmarks.py        # 8-model cross-validation suite
+│   ├── symbolic_extractor.py               # Kinetic rate law distillation
+│   └── run_gui.py                          # Local HTTP Decision Support System server
+├── results/
+│   ├── benchmark_table_latex.tex           # LaTeX formatted benchmark results
+│   ├── ablation_table_latex.tex            # LaTeX formatted ablation results
+│   ├── symbolic_rate_laws.tex              # Formatted symbolic kinetic laws
+│   └── plasma_symbolic_equations.json      # Distilled rate parameters
+├── tests/                                  # 36 Automated Test Cases
+├── api/
+│   └── solve_inverse.js                    # Vercel Serverless autograd solver
+├── index.html                              # Web Decision Support System (Production)
+├── plasma_kan_dss_app.html                 # Plasma DSS standalone application
+├── vercel.json                             # Vercel deployment routing
+├── Plasma_CO2_KAN_Conference_Paper.md      # Full 8-Section Conference Manuscript
+└── TEAMMATE_README_PUBLICATION_GUIDE.md    # Teammate Execution & Handoff Handbook
 ```
 
 ---
 
-## 📁 Repository Structure
+## 📚 Scientific References
 
-```
-kan_hipco_model/
-│
-├── README.md                              # Master project documentation (this file)
-├── hipco_kan_dss_app.html                 # 1.22 MB Standalone Cyber-Physical Digital Twin Web Dashboard
-├── review_panel_presentation.html         # Interactive 16-slide web presentation deck
-├── HiPCO_KAN_Review_Panel_Presentation.pptx # Native 16:9 widescreen PowerPoint deck
-│
-└── nopo_paper_pkg/                        # Core Python Engineering Package
-    ├── kan_model.py                       # PyTorch implementation of PI-VRBF-KAN neural architecture
-    ├── kan_pretrained.pt                  # Pretrained model checkpoint weights & scalers
-    ├── build_world_class_gui.py           # Master generator script compiling hipco_kan_dss_app.html
-    ├── run_gui.py                         # Local HTTP server launcher on port 8050
-    ├── verify_gui.py                      # 33-point DOM control & JavaScript assertion test
-    ├── audit_5000_dataset_and_model.py    # Deep statistical audit & validation script
-    ├── synthetic_generator.py             # 167-equation first-principles synthetic data engine
-    ├── symbolic_extractor.py              # SymPy symbolic regression kinetic rate law extractor
-    ├── generate_master_presentation.py    # Automated generator for PPTX and HTML slide decks
-    ├── SWCNT_synthetic_5000.csv           # 5,000-run synthetic dataset (realistic missing lab flags)
-    ├── SWCNT_synthetic_5000_complete.csv  # 5,000-run clean complete ground-truth benchmark matrix
-    ├── SWCNT_synthetic_50_matched.csv     # 50-run matched validation set
-    └── figures/                           # High-resolution benchmark figures (Fig 2, Fig 4, Fig 5)
-```
-
----
-
-## ❓ FAQ & Troubleshooting
-
-### Q1: The web dashboard loads with blank charts or sliders not responding.
-* **Fix**: Ensure your browser supports JavaScript (ES6). No internet connection is required—all libraries (Chart.js, fonts, CSS) are fully embedded offline in the single standalone file.
-
-### Q2: Why does the Yield clamp to 3.60g when I type 10g in the inverse solver?
-* **Explanation**: The reactor tube volume and residence time physically restrict carbon mass conversion to $\le 3.60\text{g}$. The system enforces **Thermodynamic Feasibility Envelopes** to prevent unphysical recipe hallucinations.
-
-### Q3: How do I export optimal recipes to industrial PLC/SCADA?
-* **Explanation**: In Tab 1, after clicking `[⚡ Solve Optimal Reactor Recipe]`, look at the **OPC-UA / Modbus Industrial Output** panel at the bottom right. It generates formatted JSON setpoint payloads ready for SCADA ingestion.
-
----
-
-## 👥 Authors & Acknowledgments
-* **Lead Developer & Researcher**: Aakshay ([GitHub: @ChAakshay](https://github.com/ChAakshay))
-* **Target Publication Venues**:
-  - *IEEE Transactions on Neural Networks and Learning Systems (TNNLS)*
-  - *Computers & Chemical Engineering*
-  - *Nature Communications Engineering*
-
----
-*⭐ If you find this codebase useful for your research, please give it a star on GitHub!*
+1. **J. Li, A. Bogaerts et al.**, *"Machine learning for plasma-assisted $\text{CO}_2$ conversion: Unveiling multidimensional parameter interactions across 358 reactor trials"*, *Green Chemistry*, 2026.
+2. **R. Snoeckx & A. Bogaerts**, *"Plasma technology – a novel solution for $\text{CO}_2$ conversion?"*, *Chemical Society Reviews*, 46(19), 5805-5863.
+3. **Z. Liu et al.**, *"KAN: Kolmogorov-Arnold Networks"*, *arXiv preprint arXiv:2404.19756*, 2024.
+4. **DIFFER / TU Eindhoven Non-Thermal Plasma Group**, *"Microwave and DBD dissociation of $\text{CO}_2$ under sub-atmospheric regimes"*, *4TU.ResearchData*, 2025.

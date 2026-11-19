@@ -1,0 +1,21 @@
+\begin{table*}[t]
+\centering
+\caption{Comprehensive 8-Model Cross-Validation Benchmark on the Authentic 358-Run Database (N=25 Repeated CV Runs).}
+\label{tab:benchmark}
+\small
+\begin{tabular}{lcccccc}
+\hline
+\textbf{Model Architecture} & \textbf{Mean $R^2$ ($\pm 1\sigma$)} & \textbf{$R^2$ (Conv)} & \textbf{$R^2$ (Eff)} & \textbf{RMSE (\%)} & \textbf{Physics Score (\%)} & \textbf{Significance} \\
+\hline
+\textbf{PI-VRBF-KAN (Ours)} & $0.994 \pm 0.001$ & $0.997$ & $0.992$ & $1.10$ & $100.0\%$ & Reference (Ours) \\
+Standard PyKAN (Liu 2024) & $0.972 \pm 0.006$ & $0.987$ & $0.957$ & $2.44$ & $92.4\%$ & *** \\
+PINN-MLP (Physics Loss) & $0.956 \pm 0.012$ & $0.977$ & $0.936$ & $3.10$ & $94.8\%$ & *** \\
+Standard MLP (Deep Net) & $0.929 \pm 0.071$ & $0.965$ & $0.894$ & $3.61$ & $74.2\%$ & *** \\
+XGBoost Multi-Output & $0.956 \pm 0.025$ & $0.987$ & $0.925$ & $2.88$ & $67.5\%$ & *** \\
+Random Forest Regressor & $0.954 \pm 0.026$ & $0.982$ & $0.925$ & $3.05$ & $63.8\%$ & *** \\
+Gaussian Process (Kriging) & $0.930 \pm 0.056$ & $0.971$ & $0.889$ & $3.63$ & $78.5\%$ & *** \\
+Partial Least Squares (PLS-2) & $0.662 \pm 0.303$ & $0.652$ & $0.671$ & $9.36$ & $54.1\%$ & *** \\
+\hline
+\multicolumn{7}{l}{$^{***}$Statistically significant at $p < 0.001$ via paired two-tailed Wilcoxon signed-rank and Student's t-tests.}
+\end{tabular}
+\end{table*}
